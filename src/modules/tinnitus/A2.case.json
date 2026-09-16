@@ -2,47 +2,13 @@
   "id":"A2","title":"Unilateral tinnitus with asymmetric hearing loss","module":"TinniSense","educationalStatus":"provisional",
   "patient":{"age":42,"sex":"Female","chiefConcern":"Constant left-sided non-pulsatile tinnitus"},
   "simulation":{
-    "initialTrust":55,
-    "initialEmotion":"concerned",
-    "initialEngagement":60,
+    "initialTrust":55,"initialEmotion":"concerned","initialEngagement":60,
     "patient":{"name":"Anjali","avatar":"A","intro":"Anjali has come to the clinic because of a persistent sound in her left ear. She appears worried and is waiting for you to begin the consultation."},
     "turns":[
-      {
-        "patient":"I've been hearing this ringing in my left ear. It's been worrying me.",
-        "prompt":"How will you begin the consultation?",
-        "options":[
-          {"id":"a","text":"Tell me more about the sound and what you have noticed about it.","style":"Open-ended, patient-centred","trust":10,"engagement":8,"emotion":"concerned","relevance":1,"empathy":2,"reveals":["Persistent tinnitus","Patient is worried"]},
-          {"id":"b","text":"Don't worry. Tinnitus is usually harmless.","style":"Premature reassurance","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},
-          {"id":"c","text":"Let's skip the history and start the hearing test.","style":"Test-first approach","trust":-5,"engagement":-5,"relevance":0}
-        ]
-      },
-      {
-        "patient":"It is mostly there every day. I first noticed it about six months ago.",
-        "prompt":"Which question is most useful next?",
-        "options":[
-          {"id":"a","text":"Is the sound in one ear or both, and is it rhythmic or pulse-synchronous?","style":"Targeted tinnitus history","trust":8,"engagement":8,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Six-month duration","Left-sided tinnitus","Non-pulsatile presentation"]},
-          {"id":"b","text":"Do you normally watch television at night?","style":"Low-yield question","relevance":0},
-          {"id":"c","text":"Are you sure it is really tinnitus?","style":"Invalidating response","trust":-10,"engagement":-8,"emotion":"anxious","harm":1}
-        ]
-      },
-      {
-        "patient":"Only my left ear. It isn't beating with my pulse. I also feel like my hearing on that side isn't as good as it used to be.",
-        "prompt":"The patient has now disclosed unilateral symptoms and perceived hearing difficulty. What should you explore?",
-        "options":[
-          {"id":"a","text":"Ask about sudden changes, neurological symptoms, ear history, noise exposure and other associated symptoms.","style":"Safety-focused exploration","trust":10,"engagement":10,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Perceived left hearing reduction","Need to screen associated symptoms"]},
-          {"id":"b","text":"Tell her that unilateral tinnitus is common and move directly to treatment.","style":"Premature closure","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},
-          {"id":"c","text":"Ask only how loud the tinnitus feels.","style":"Narrow symptom focus","relevance":0}
-        ]
-      },
-      {
-        "patient":"I'm mainly afraid that something serious could be causing it. I just want to know what is happening.",
-        "prompt":"How will you respond before moving to diagnostic testing?",
-        "options":[
-          {"id":"a","text":"Acknowledge the concern, explain that you will investigate the pattern carefully, and tell her what the next steps are.","style":"Empathic + clinically appropriate","trust":12,"engagement":10,"emotion":"reassured","relevance":2,"empathy":3,"reveals":["High concern about serious cause","Patient wants explanation and next steps"]},
-          {"id":"b","text":"There is no reason to be worried until we find something.","style":"Dismissive reassurance","trust":-10,"engagement":-8,"emotion":"anxious","harm":1},
-          {"id":"c","text":"I can't say anything until after the test.","style":"Technically safe but poor communication","trust":-3,"engagement":-2,"relevance":1}
-        ]
-      }
+      {"patient":"I've been hearing this ringing in my left ear. It's been worrying me.","prompt":"How will you begin the consultation?","options":[{"id":"a","text":"Tell me more about the sound and what you have noticed about it.","style":"Open-ended, patient-centred","trust":10,"engagement":8,"emotion":"concerned","relevance":1,"empathy":2,"reveals":["Persistent tinnitus","Patient is worried"]},{"id":"b","text":"Don't worry. Tinnitus is usually harmless.","style":"Premature reassurance","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},{"id":"c","text":"Let's skip the history and start the hearing test.","style":"Test-first approach","trust":-5,"engagement":-5,"relevance":0}]},
+      {"patient":"It is mostly there every day. I first noticed it about six months ago.","patientByTrust":{"low":"I suppose it has been there for months. I don't know how much I should tell you.","high":"Yes, it is there most days. I noticed it about six months ago, and I feel comfortable telling you more about it."},"prompt":"Which question is most useful next?","options":[{"id":"a","text":"Is the sound in one ear or both, and is it rhythmic or pulse-synchronous?","style":"Targeted tinnitus history","trust":8,"engagement":8,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Six-month duration","Left-sided tinnitus","Non-pulsatile presentation"]},{"id":"b","text":"Do you normally watch television at night?","style":"Low-yield question","relevance":0},{"id":"c","text":"Are you sure it is really tinnitus?","style":"Invalidating response","trust":-10,"engagement":-8,"emotion":"anxious","harm":1}]},
+      {"patient":"Only my left ear. It isn't beating with my pulse. I also feel like my hearing on that side isn't as good as it used to be.","patientByTrust":{"low":"Only my left ear. I haven't really said much because I feel like I'm not being listened to.","high":"Only my left ear. It isn't beating with my pulse. I also feel like my hearing on that side isn't as good as it used to be."},"prompt":"The patient has now disclosed unilateral symptoms and perceived hearing difficulty. What should you explore?","options":[{"id":"a","text":"Ask about sudden changes, neurological symptoms, ear history, noise exposure and other associated symptoms.","style":"Safety-focused exploration","trust":10,"engagement":10,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Perceived left hearing reduction","Need to screen associated symptoms"]},{"id":"b","text":"Tell her that unilateral tinnitus is common and move directly to treatment.","style":"Premature closure","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},{"id":"c","text":"Ask only how loud the tinnitus feels.","style":"Narrow symptom focus","relevance":0}]},
+      {"patient":"I'm mainly afraid that something serious could be causing it. I just want to know what is happening.","patientByTrust":{"low":"I'm still worried, and I'm not sure I understand what is happening. I just want someone to take my concern seriously.","high":"I'm mainly afraid that something serious could be causing it. I appreciate you explaining what you are looking for. I just want to know what is happening."},"prompt":"How will you respond before moving to diagnostic testing?","options":[{"id":"a","text":"Acknowledge the concern, explain that you will investigate the pattern carefully, and tell her what the next steps are.","style":"Empathic + clinically appropriate","trust":12,"engagement":10,"emotion":"reassured","relevance":2,"empathy":3,"reveals":["High concern about serious cause","Patient wants explanation and next steps"]},{"id":"b","text":"There is no reason to be worried until we find something.","style":"Dismissive reassurance","trust":-10,"engagement":-8,"emotion":"anxious","harm":1},{"id":"c","text":"I can't say anything until after the test.","style":"Technically safe but poor communication","trust":-3,"engagement":-2,"relevance":1}]}
     ]
   },
   "stages":[
