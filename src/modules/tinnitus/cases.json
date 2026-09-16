@@ -1,0 +1,8 @@
+[
+  {"id":"A1","title":"Gradual bilateral tinnitus with mild-moderate high-frequency SNHL","status":"specified","note":"Use the supplied research protocol for full vignette, findings, scoring key and management rationale."},
+  {"id":"A2","title":"Constant unilateral tinnitus with asymmetric SNHL","status":"specified","note":"Red-flag recognition and appropriate medical referral are core reasoning targets."},
+  {"id":"A3","title":"Pulse-synchronous tinnitus","status":"specified","note":"Vascular/medical red-flag recognition and referral are core reasoning targets."},
+  {"id":"A4","title":"Severe tinnitus distress with insomnia and anxiety","status":"specified","note":"Integrate tinnitus management with appropriate psychosocial co-management and safety awareness."},
+  {"id":"A5","title":"Persistent bilateral tinnitus with normal conventional thresholds","status":"specified","note":"Reason through tinnitus despite a normal conventional audiogram and avoid inappropriate fitting."},
+  {"id":"A6","title":"Tinnitus with hyperacusis and reduced loudness discomfort levels","status":"specified","note":"Address co-occurring sound intolerance and avoid inappropriate over-protection."}
+]
