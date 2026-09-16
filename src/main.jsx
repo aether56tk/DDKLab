@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import CaseEngine from './components/CaseEngine';
@@ -8,51 +8,101 @@ import tinnitusA3 from './modules/tinnitus/A3.case.json';
 import tinnitusA4 from './modules/tinnitus/A4.case.json';
 import tinnitusA5 from './modules/tinnitus/A5.case.json';
 import tinnitusA6 from './modules/tinnitus/A6.case.json';
-
-const tinnitusCases = [tinnitusA1, tinnitusA2, tinnitusA3, tinnitusA4, tinnitusA5, tinnitusA6];
+import rehabilitationCases from './modules/rehabilitation/cases.json';
+import hearingAidCases from './modules/hearing-aids/cases.json';
 
 const modules = [
-  { id: 'tinnitus', name: 'TinniSense', icon: '◉', subtitle: 'Tinnitus assessment & management', description: 'Reason through tinnitus presentations, identify red flags, and formulate an evidence-informed management plan.', cases: 6, colorClass: 'tinnitus' },
-  { id: 'rehabilitation', name: 'RehabMind', icon: '◇', subtitle: 'Audiological rehabilitation', description: 'Translate patient goals, lifestyle demands and communication needs into an individualized rehabilitation plan.', cases: 4, colorClass: 'rehab' },
-  { id: 'hearing-aids', name: 'HearWise', icon: '◈', subtitle: 'Hearing-aid decisions & troubleshooting', description: 'Integrate audiometry, patient needs, technology, verification and troubleshooting into defensible decisions.', cases: 4, colorClass: 'hearing' }
+  { id: 'tinnitus', name: 'TinniSense', icon: '◉', subtitle: 'Tinnitus assessment & management', description: 'Reason through tinnitus presentations, identify red flags, and formulate an evidence-informed management plan.', cases: [tinnitusA1, tinnitusA2, tinnitusA3, tinnitusA4, tinnitusA5, tinnitusA6], colorClass: 'tinnitus', accent: 'coral' },
+  { id: 'rehabilitation', name: 'RehabMind', icon: '◇', subtitle: 'Audiological rehabilitation', description: 'Translate patient goals, lifestyle demands and communication needs into an individualized rehabilitation plan.', cases: rehabilitationCases, colorClass: 'rehab', accent: 'blue' },
+  { id: 'hearing-aids', name: 'HearWise', icon: '◈', subtitle: 'Hearing-aid decisions & troubleshooting', description: 'Integrate audiometry, patient needs, technology, verification and troubleshooting into defensible decisions.', cases: hearingAidCases, colorClass: 'hearing', accent: 'green' }
 ];
 
+const workflow = ['Case history', 'Feature extraction', 'Diagnostic interpretation', 'Red flags', 'Management', 'Clinical justification', 'Follow-up'];
+
+function readProgress() {
+  try { return JSON.parse(localStorage.getItem('acl-progress') || '{}'); } catch { return {}; }
+}
+
 function App() {
-  const [selected, setSelected] = useState(null);
+  const [view, setView] = useState('home');
+  const [selectedModule, setSelectedModule] = useState(null);
   const [activeCase, setActiveCase] = useState(null);
-  if (activeCase) return <CaseEngine caseData={activeCase} onBack={() => setActiveCase(null)} />;
-  if (selected) return <ModuleView module={selected} onBack={() => setSelected(null)} onOpenCase={setActiveCase} />;
+  const [progress, setProgress] = useState(readProgress);
+
+  const completed = Object.values(progress);
+  const average = completed.length ? Math.round(completed.reduce((sum, item) => sum + (item.percent || 0), 0) / completed.length) : 0;
+
+  function openModule(module) { setSelectedModule(module); setView('module'); }
+  function saveCompletion(result) {
+    const next = { ...readProgress(), [result.id]: result };
+    localStorage.setItem('acl-progress', JSON.stringify(next));
+    setProgress(next);
+  }
+
+  if (activeCase) {
+    return <CaseEngine caseData={activeCase} onBack={() => setActiveCase(null)} onComplete={saveCompletion} />;
+  }
+  if (view === 'progress') return <ProgressView progress={progress} onBack={() => setView('home')} onOpenCase={(c) => setActiveCase(c)} />;
+  if (view === 'module' && selectedModule) return <ModuleView module={selectedModule} onBack={() => { setSelectedModule(null); setView('home'); }} onOpenCase={setActiveCase} progress={progress} />;
 
   return (
-    <main className="app-shell">
-      <header className="topbar"><div className="brand"><span className="brand-mark">A</span><span>Audio-Clinical Lab</span></div><span className="status-pill">RESEARCH MVP</span></header>
-      <section className="hero"><p className="eyebrow">CLINICAL REASONING SIMULATION</p><h1>Think like a clinician.<br /><span>Decide with evidence.</span></h1><p className="hero-copy">A structured case-based learning environment for undergraduate audiology education across tinnitus, rehabilitation and hearing-aid management.</p></section>
-      <section className="module-grid" aria-label="Clinical modules">
-        {modules.map((module) => <button key={module.id} className={`module-card ${module.colorClass}`} onClick={() => setSelected(module)}><div className="card-icon">{module.icon}</div><div className="card-content"><span className="card-kicker">MODULE</span><h2>{module.name}</h2><h3>{module.subtitle}</h3><p>{module.description}</p><span className="launch">Open module →</span></div><span className="case-count">{module.cases} cases</span></button>)}
+    <main className="site-shell">
+      <header className="site-nav">
+        <button className="brand-button" onClick={() => setView('home')}><span className="brand-mark">A</span><span><b>Audio-Clinical</b> Lab</span></button>
+        <nav><button onClick={() => setView('home')}>Home</button><button onClick={() => setView('progress')}>My Progress</button><a href="https://github.com/aether56tk/audio-clinical-lab" target="_blank" rel="noreferrer">Research ↗</a></nav>
+        <span className="research-badge">RESEARCH MVP</span>
+      </header>
+
+      <section className="hero-section">
+        <div className="hero-copy-block">
+          <p className="eyebrow">WEB-BASED CLINICAL REASONING</p>
+          <h1>Think beyond<br /><span>the audiogram.</span></h1>
+          <p className="hero-subtitle">Interactive simulated cases for undergraduate audiology education — built around reasoning, management and follow-up.</p>
+          <div className="hero-actions"><button className="primary-button" onClick={() => openModule(modules[0])}>Start a case →</button><button className="secondary-button" onClick={() => setView('progress')}>View progress</button></div>
+          <div className="trust-row"><span>✓ Case-based</span><span>✓ Evidence-linked</span><span>✓ Progress tracking</span></div>
+        </div>
+        <div className="hero-visual" aria-hidden="true"><div className="ear-orbit"><span className="wave wave-1" /><span className="wave wave-2" /><span className="wave wave-3" /><div className="ear-symbol">◖</div></div><div className="visual-caption">LEARN · REASON · DECIDE · GROW</div></div>
       </section>
-      <section className="workflow"><div><p className="eyebrow">STANDARDIZED WORKFLOW</p><h2>From patient story to defensible decision.</h2></div><div className="steps">{['History', 'Findings', 'Interpret', 'Red flags', 'Decide', 'Justify', 'Follow-up'].map((step, i) => <div className="step" key={step}><span>{String(i + 1).padStart(2, '0')}</span>{step}</div>)}</div></section>
-      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.3.0</span></footer>
+
+      <section className="section-block">
+        <div className="section-heading"><div><p className="eyebrow">THREE CLINICAL DOMAINS</p><h2>Choose your reasoning lab</h2></div><span>{completed.length} case{completed.length === 1 ? '' : 's'} completed · {average}% average</span></div>
+        <div className="module-grid">
+          {modules.map((module) => <button key={module.id} className={`module-card ${module.colorClass}`} onClick={() => openModule(module)}><div className="module-icon">{module.icon}</div><div><span className="card-kicker">{module.cases.length} SIMULATED CASES</span><h3>{module.name}</h3><p className="module-subtitle">{module.subtitle}</p><p>{module.description}</p><span className="launch-link">Explore cases →</span></div></button>)}
+        </div>
+      </section>
+
+      <section className="workflow-section"><div><p className="eyebrow">STANDARDIZED SEVEN-STAGE WORKFLOW</p><h2>From patient story to defensible decision.</h2><p>Every case follows the same reasoning structure so performance can be compared across domains.</p></div><div className="workflow-grid">{workflow.map((step, i) => <div className="workflow-step" key={step}><span>{String(i + 1).padStart(2, '0')}</span><b>{step}</b></div>)}</div></section>
+
+      <section className="research-strip"><div><p className="eyebrow">RESEARCH MODE</p><h2>Designed as both a learning tool and a research prototype.</h2><p>The protocol measures clinical reasoning, confidence, usability and decision latency. Scoring keys remain provisional until expert validation.</p></div><div className="research-metrics"><div><strong>18</strong><span>TinniSense max</span></div><div><strong>16</strong><span>RehabMind max</span></div><div><strong>19</strong><span>HearWise max</span></div></div></section>
+
+      <footer className="site-footer"><span>Audio-Clinical Lab · v1.0 research prototype</span><span>Educational simulation • Not for real clinical diagnosis</span></footer>
     </main>
   );
 }
 
-function ModuleView({ module, onBack, onOpenCase }) {
-  const ids = module.id === 'tinnitus' ? 'A' : module.id === 'rehabilitation' ? 'B' : 'C';
-  const availableCases = module.id === 'tinnitus' ? tinnitusCases : [];
+function ModuleView({ module, onBack, onOpenCase, progress }) {
+  const done = module.cases.filter((c) => progress[c.id]).length;
   return (
-    <main className="app-shell module-view">
-      <header className="topbar"><button className="back" onClick={onBack}>← Back</button><div className="brand"><span className="brand-mark">A</span><span>Audio-Clinical Lab</span></div><span className="status-pill">MVP</span></header>
-      <section className={`module-hero ${module.colorClass}`}><span className="card-kicker">{module.cases} SIMULATED CASES SPECIFIED</span><h1>{module.name}</h1><p>{module.subtitle}</p><p className="hero-copy">{module.description}</p></section>
-      <section className="case-panel"><div className="case-panel-head"><div><p className="eyebrow">CASE LIBRARY</p><h2>Choose a case</h2></div><span className="muted">Clinical reasoning workflow</span></div>
-        {Array.from({ length: module.cases }, (_, i) => {
-          const id = `${ids}${i + 1}`;
-          const caseData = availableCases[i];
-          return <div className="case-row" key={id}><span className="case-id">{id}</span><div><strong>{caseData ? caseData.title : `Simulated clinical case ${i + 1}`}</strong><small>History → Findings → Interpretation → Management → Follow-up</small></div>{caseData ? <button className="launch-case" onClick={() => onOpenCase(caseData)}>Start case →</button> : <span className="coming">CASE ENGINE NEXT</span>}</div>;
-        })}
-      </section>
-      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.3.0</span></footer>
+    <main className="site-shell inner-shell">
+      <header className="site-nav"><button className="brand-button" onClick={onBack}><span className="brand-mark">A</span><span><b>Audio-Clinical</b> Lab</span></button><nav><button onClick={onBack}>Home</button><button>My Progress</button><a href="https://github.com/aether56tk/audio-clinical-lab" target="_blank" rel="noreferrer">Research ↗</a></nav><span className="research-badge">{done}/{module.cases.length} COMPLETE</span></header>
+      <section className={`module-banner ${module.colorClass}`}><button className="text-back" onClick={onBack}>← All modules</button><div><span className="card-kicker">{module.cases.length} SIMULATED CASES</span><h1>{module.name}</h1><p>{module.subtitle}</p><span>{module.description}</span></div><div className="module-score"><strong>{done}</strong><span>completed</span></div></section>
+      <section className="case-library"><div className="section-heading"><div><p className="eyebrow">CASE LIBRARY</p><h2>Choose a case</h2></div><span>Clinical reasoning workflow</span></div><div className="case-grid">{module.cases.map((caseData, index) => <CaseCard key={caseData.id} caseData={caseData} index={index} completed={progress[caseData.id]} onOpen={() => onOpenCase(caseData)} />)}</div></section>
+      <footer className="site-footer"><span>Audio-Clinical Lab · {module.name}</span><span>Educational simulation • Not for real clinical diagnosis</span></footer>
     </main>
   );
 }
+
+function CaseCard({ caseData, index, completed, onOpen }) {
+  return <article className={`case-card ${completed ? 'completed' : ''}`}><div className="case-card-top"><span className="case-number">{caseData.id}</span>{completed ? <span className="completed-pill">✓ {completed.percent}%</span> : <span className="case-status">CASE {String(index + 1).padStart(2, '0')}</span>}</div><h3>{caseData.title}</h3><p>{caseData.patient ? `${caseData.patient.age}-year-old ${caseData.patient.sex} · ${caseData.patient.chiefConcern}` : caseData.note}</p><div className="case-card-footer"><span>{caseData.maxScore} points</span><button onClick={onOpen}>{completed ? 'Review case →' : 'Start case →'}</button></div></article>;
+}
+
+function ProgressView({ progress, onBack, onOpenCase }) {
+  const entries = Object.values(progress);
+  const average = entries.length ? Math.round(entries.reduce((s, x) => s + x.percent, 0) / entries.length) : 0;
+  const allCases = modules.flatMap((m) => m.cases);
+  return <main className="site-shell inner-shell"><header className="site-nav"><button className="brand-button" onClick={onBack}><span className="brand-mark">A</span><span><b>Audio-Clinical</b> Lab</span></button><nav><button onClick={onBack}>Home</button><button className="nav-active">My Progress</button><a href="https://github.com/aether56tk/audio-clinical-lab" target="_blank" rel="noreferrer">Research ↗</a></nav><span className="research-badge">STUDENT DASHBOARD</span></header><section className="progress-header"><p className="eyebrow">MY LEARNING JOURNEY</p><h1>Clinical reasoning progress</h1><p>Practice across all three modules and review your performance history.</p></section><section className="stats-grid"><Stat value={entries.length} label="Cases completed" /><Stat value={`${average}%`} label="Average score" /><Stat value={entries.length ? (entries.reduce((s, x) => s + (x.confidence || 0), 0) / entries.length).toFixed(1) : '—'} label="Average confidence" /><Stat value={entries.length ? `${Math.round(entries.reduce((s, x) => s + (x.duration || 0), 0) / 60)}m` : '0m'} label="Practice time" /></section><section className="progress-content"><div className="progress-panel"><div className="section-heading"><div><p className="eyebrow">MODULE PERFORMANCE</p><h2>Coverage</h2></div></div>{modules.map((m) => { const done = m.cases.filter(c => progress[c.id]).length; const pct = Math.round((done / m.cases.length) * 100); return <div className="module-progress" key={m.id}><div><b>{m.name}</b><span>{done}/{m.cases.length} cases</span></div><div className="bar"><span className={m.colorClass} style={{width:`${pct}%`}} /></div></div>; })}</div><div className="progress-panel"><div className="section-heading"><div><p className="eyebrow">RECENT ACTIVITY</p><h2>Case history</h2></div></div>{entries.length === 0 ? <p className="empty-state">No cases completed yet. Start with TinniSense A1.</p> : entries.slice().reverse().map((item) => { const c = allCases.find(x => x.id === item.id); return <button className="activity-row" key={item.id} onClick={() => c && onOpenCase(c)}><span className="activity-id">{item.id}</span><span><b>{c?.title || item.id}</b><small>{item.percent}% · confidence {item.confidence || '—'}/5</small></span><span>→</span></button>; })}</div></section><footer className="site-footer"><span>Audio-Clinical Lab · Progress</span><span>Local demo data only</span></footer></main>;
+}
+
+function Stat({ value, label }) { return <div className="stat-card"><strong>{value}</strong><span>{label}</span></div>; }
 
 createRoot(document.getElementById('root')).render(<App />);
