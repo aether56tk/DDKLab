@@ -1,0 +1,80 @@
+{
+  "id": "A1",
+  "title": "Gradual bilateral tinnitus with high-frequency SNHL",
+  "module": "TinniSense",
+  "educationalStatus": "provisional",
+  "patient": {
+    "age": 55,
+    "sex": "Male",
+    "chiefConcern": "Gradual bilateral ringing tinnitus"
+  },
+  "stages": [
+    {
+      "id": "history",
+      "title": "1. Extract the clinical story",
+      "prompt": "Which information is most important to establish before selecting management?",
+      "options": [
+        {"id":"h1","text":"Tinnitus laterality, onset/course, hearing concerns, noise exposure, otologic symptoms and impact on daily life","score":3},
+        {"id":"h2","text":"Only the pitch and loudness of the tinnitus","score":1},
+        {"id":"h3","text":"Only whether the patient wants a hearing aid","score":0}
+      ],
+      "feedback": "A complete tinnitus history should establish the tinnitus characteristics, associated hearing/otologic concerns and functional impact before management is selected."
+    },
+    {
+      "id": "findings",
+      "title": "2. Interpret the findings",
+      "prompt": "The case provides mild-to-moderate high-frequency sensorineural hearing loss with gradual bilateral tinnitus. Which interpretation best fits the supplied case?",
+      "options": [
+        {"id":"f1","text":"The tinnitus presentation is occurring alongside bilateral high-frequency SNHL and should be considered in the overall hearing-management plan","score":3},
+        {"id":"f2","text":"The findings prove a specific retrocochlear lesion","score":0},
+        {"id":"f3","text":"The normality of one low-frequency region excludes hearing-related tinnitus","score":0}
+      ],
+      "feedback": "The supplied case links gradual bilateral tinnitus with mild-to-moderate high-frequency SNHL. The platform should avoid claiming a specific pathology that the case does not establish."
+    },
+    {
+      "id": "redflags",
+      "title": "3. Check for red flags",
+      "prompt": "Based on the supplied presentation, how should red-flag screening be handled?",
+      "options": [
+        {"id":"r1","text":"Screen for clinically important red flags; the gradual bilateral presentation itself does not establish a unilateral, pulsatile or acute emergency pattern","score":3},
+        {"id":"r2","text":"Assume that every tinnitus presentation requires emergency referral","score":0},
+        {"id":"r3","text":"Skip red-flag screening because the audiogram already gives the diagnosis","score":0}
+      ],
+      "feedback": "Red-flag screening remains part of the standardized workflow. The case description does not specify a red-flag pattern requiring an emergency conclusion."
+    },
+    {
+      "id": "management",
+      "title": "4. Select management",
+      "prompt": "Which management direction best matches the supplied case objective?",
+      "options": [
+        {"id":"m1","text":"Counselling/education with an appropriate sound-therapy option, while addressing hearing needs and patient preferences","score":3},
+        {"id":"m2","text":"Provide a device immediately without discussing tinnitus impact, expectations or preferences","score":0},
+        {"id":"m3","text":"Recommend complete silence and avoidance of all environmental sound","score":0}
+      ],
+      "feedback": "The case objective specifies selecting sound therapy and counselling. Management should also be connected to the patient's hearing needs and preferences."
+    },
+    {
+      "id": "justify",
+      "title": "5. Justify the decision",
+      "prompt": "Choose the justification that best connects the case findings to the management plan.",
+      "options": [
+        {"id":"j1","text":"The gradual bilateral tinnitus occurs with high-frequency SNHL; counselling and sound-based support can be considered within an individualized management plan, with outcomes monitored over time","score":3},
+        {"id":"j2","text":"The tinnitus must be caused by one confirmed disease even though the case does not provide that diagnosis","score":0},
+        {"id":"j3","text":"Management should be identical for every patient with tinnitus","score":0}
+      ],
+      "feedback": "Clinical reasoning requires a defensible link between the supplied findings, the management choice and the patient's needs, without over-claiming a diagnosis."
+    },
+    {
+      "id": "followup",
+      "title": "6. Plan follow-up",
+      "prompt": "What should be monitored at follow-up?",
+      "options": [
+        {"id":"p1","text":"Tinnitus impact/distress, hearing-related difficulties, adherence and patient-reported benefit, with management adjusted when needed","score":3},
+        {"id":"p2","text":"Only whether the tinnitus has completely disappeared","score":0},
+        {"id":"p3","text":"No follow-up is needed after initial counselling","score":0}
+      ],
+      "feedback": "Follow-up should evaluate meaningful patient outcomes rather than requiring complete tinnitus elimination as the only success criterion."
+    }
+  ],
+  "maxScore": 18
+}
