@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import CaseVisual from './CaseVisual';
+import './case-visual.css';
 
 const emotionMeta={calm:{icon:'🙂',label:'Calm'},concerned:{icon:'😟',label:'Concerned'},anxious:{icon:'😰',label:'Anxious'},distressed:{icon:'😣',label:'Distressed'},reassured:{icon:'😌',label:'More at ease'}};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
