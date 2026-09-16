@@ -28,6 +28,15 @@ export default function PatientInteraction({ simulation, onComplete }) {
     return clamp(Math.round(45 + relevant * 9 + empathy * 5 - harmful * 8 + (trust - 50) * 0.25), 0, 100);
   }, [history, trust]);
 
+  const patientMessage = useMemo(() => {
+    if (!prompt) return '';
+    const variants = prompt.patientByTrust;
+    if (!variants) return prompt.patient;
+    if (trust < 45 && variants.low) return variants.low;
+    if (trust >= 70 && variants.high) return variants.high;
+    return prompt.patient;
+  }, [prompt, trust]);
+
   function choose(option) {
     const nextTrust = clamp(trust + (option.trust || 0), 0, 100);
     const nextEngagement = clamp(engagement + (option.engagement || 0), 0, 100);
@@ -85,14 +94,14 @@ export default function PatientInteraction({ simulation, onComplete }) {
         <div className="patient-scene-copy">
           <span className="card-kicker">SIMULATED PATIENT · LIVE ENCOUNTER</span>
           <h2>{simulation.patient?.name || 'Patient'}</h2>
-          <p>{simulation.patient?.intro || 'The patient is waiting for you to begin.'}</p>
+          <p>{simulation.patient?.intro || 'The patient is waiting for you to begin the consultation.'}</p>
         </div>
         <div className={`patient-state ${emotion}`}><span>{emotionInfo.icon}</span><div><small>OBSERVED STATE</small><b>{emotionInfo.label}</b></div></div>
       </div>
 
       <div className="conversation-card">
         <div className="conversation-header"><span>ENCOUNTER · TURN {turn + 1}/{simulation.turns.length}</span><span>Trust {trust}%</span></div>
-        <div className="patient-speech"><span className="speech-avatar">{simulation.patient?.avatar || 'P'}</span><div><b>{simulation.patient?.name || 'Patient'}</b><p>{prompt.patient}</p></div></div>
+        <div className="patient-speech"><span className="speech-avatar">{simulation.patient?.avatar || 'P'}</span><div><b>{simulation.patient?.name || 'Patient'}</b><p>{patientMessage}</p></div></div>
         <div className="clinician-prompt"><span>YOUR RESPONSE</span><h3>{prompt.prompt}</h3></div>
         <div className="interaction-options">
           {prompt.options.map(option => (
