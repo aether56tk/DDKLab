@@ -14,7 +14,7 @@ Audio-Clinical Lab brings three connected learning domains into one structured c
 
 The platform is an educational/research prototype. It is **not a diagnostic or patient-management system** and must not be used for real clinical decision-making.
 
-The supplied protocol describes a quasi-experimental pre-test/post-test evaluation and measures clinical reasoning, management planning, confidence, usability and decision latency. fileciteturn15file2L87-L102
+The supplied research protocol describes a quasi-experimental pre-test/post-test evaluation and measures clinical reasoning, management planning, confidence, usability and decision latency.
 
 ## What you can do now
 
@@ -42,8 +42,6 @@ Each case follows the protocol's seven-stage structure:
 6. Clinical justification
 7. Follow-up and outcome measurement
 
-The protocol explicitly defines these stages and the three modules. fileciteturn15file4L157-L179
-
 ## Current case library
 
 **14 cases are playable in the current MVP:**
@@ -56,15 +54,13 @@ The supplied research protocol specifies expansion to **16–20 simulated cases*
 
 ## Scoring and research metrics
 
-The protocol defines these module totals:
-
 | Module | Maximum | Main scoring focus |
 |---|---:|---|
 | TinniSense | 18 | History/red flags, assessment/interpretation, management/justification/follow-up |
 | RehabMind | 16 | Functional needs, COSI/GAS goal structuring, individualization/counselling |
 | HearWise | 19 | Audiogram/needs synthesis, fitting/verification, troubleshooting/counselling |
 
-The protocol also specifies confidence on a 1–5 scale, SUS on a 0–100 scale and decision latency in seconds. fileciteturn15file1L20-L45
+The protocol also specifies confidence on a 1–5 scale, SUS on a 0–100 scale and decision latency in seconds.
 
 **Important:** the case keys and feedback in this MVP are provisional. They require expert validation before participant research or publication.
 
@@ -88,9 +84,9 @@ npm run preview
 
 ## GitHub Pages deployment
 
-The repository now contains a GitHub Actions deployment workflow and Vite project-base configuration for the repository site. Vite's documented GitHub Pages flow uses the repository base path, a Pages Actions workflow, and a build step. citeturn1search1turn1search3
+The repository contains a GitHub Actions workflow and Vite project-base configuration for GitHub Pages.
 
-One GitHub account setting remains necessary: in **Repository → Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. After that, pushes to `main` can publish the built site automatically. GitHub documents the project-site URL pattern as `https://<username>.github.io/<repository>/`. citeturn1search0turn1search2
+One GitHub account setting remains necessary: in **Repository → Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. After that, pushes to `main` can publish the built site automatically.
 
 Expected site address:
 
@@ -110,7 +106,7 @@ Expected site address:
 
 ## Research data governance
 
-The research protocol requires informed consent, voluntary participation, separation from academic grading, no personally identifiable information in the research database, unique participant codes and secure HTTPS transmission. fileciteturn15file1L46-L76
+The research protocol requires informed consent, voluntary participation, separation from academic grading, no personally identifiable information in the research database, unique participant codes and secure HTTPS transmission.
 
 **Do not place real participant data, names, student IDs, clinical records or identifiable case material in this public repository.**
 
