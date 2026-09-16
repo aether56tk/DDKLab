@@ -3,6 +3,13 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 import CaseEngine from './components/CaseEngine';
 import tinnitusA1 from './modules/tinnitus/A1.case.json';
+import tinnitusA2 from './modules/tinnitus/A2.case.json';
+import tinnitusA3 from './modules/tinnitus/A3.case.json';
+import tinnitusA4 from './modules/tinnitus/A4.case.json';
+import tinnitusA5 from './modules/tinnitus/A5.case.json';
+import tinnitusA6 from './modules/tinnitus/A6.case.json';
+
+const tinnitusCases = [tinnitusA1, tinnitusA2, tinnitusA3, tinnitusA4, tinnitusA5, tinnitusA6];
 
 const modules = [
   { id: 'tinnitus', name: 'TinniSense', icon: '◉', subtitle: 'Tinnitus assessment & management', description: 'Reason through tinnitus presentations, identify red flags, and formulate an evidence-informed management plan.', cases: 6, colorClass: 'tinnitus' },
@@ -24,13 +31,14 @@ function App() {
         {modules.map((module) => <button key={module.id} className={`module-card ${module.colorClass}`} onClick={() => setSelected(module)}><div className="card-icon">{module.icon}</div><div className="card-content"><span className="card-kicker">MODULE</span><h2>{module.name}</h2><h3>{module.subtitle}</h3><p>{module.description}</p><span className="launch">Open module →</span></div><span className="case-count">{module.cases} cases</span></button>)}
       </section>
       <section className="workflow"><div><p className="eyebrow">STANDARDIZED WORKFLOW</p><h2>From patient story to defensible decision.</h2></div><div className="steps">{['History', 'Findings', 'Interpret', 'Red flags', 'Decide', 'Justify', 'Follow-up'].map((step, i) => <div className="step" key={step}><span>{String(i + 1).padStart(2, '0')}</span>{step}</div>)}</div></section>
-      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.2.0</span></footer>
+      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.3.0</span></footer>
     </main>
   );
 }
 
 function ModuleView({ module, onBack, onOpenCase }) {
   const ids = module.id === 'tinnitus' ? 'A' : module.id === 'rehabilitation' ? 'B' : 'C';
+  const availableCases = module.id === 'tinnitus' ? tinnitusCases : [];
   return (
     <main className="app-shell module-view">
       <header className="topbar"><button className="back" onClick={onBack}>← Back</button><div className="brand"><span className="brand-mark">A</span><span>Audio-Clinical Lab</span></div><span className="status-pill">MVP</span></header>
@@ -38,11 +46,11 @@ function ModuleView({ module, onBack, onOpenCase }) {
       <section className="case-panel"><div className="case-panel-head"><div><p className="eyebrow">CASE LIBRARY</p><h2>Choose a case</h2></div><span className="muted">Clinical reasoning workflow</span></div>
         {Array.from({ length: module.cases }, (_, i) => {
           const id = `${ids}${i + 1}`;
-          const isReady = id === 'A1';
-          return <div className="case-row" key={id}><span className="case-id">{id}</span><div><strong>{isReady ? tinnitusA1.title : `Simulated clinical case ${i + 1}`}</strong><small>History → Findings → Interpretation → Management → Follow-up</small></div>{isReady ? <button className="launch-case" onClick={() => onOpenCase(tinnitusA1)}>Start case →</button> : <span className="coming">CASE ENGINE NEXT</span>}</div>;
+          const caseData = availableCases[i];
+          return <div className="case-row" key={id}><span className="case-id">{id}</span><div><strong>{caseData ? caseData.title : `Simulated clinical case ${i + 1}`}</strong><small>History → Findings → Interpretation → Management → Follow-up</small></div>{caseData ? <button className="launch-case" onClick={() => onOpenCase(caseData)}>Start case →</button> : <span className="coming">CASE ENGINE NEXT</span>}</div>;
         })}
       </section>
-      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.2.0</span></footer>
+      <footer><span>Educational simulation • Not for real clinical diagnosis</span><span>Audio-Clinical Lab · v0.3.0</span></footer>
     </main>
   );
 }
