@@ -1,12 +1,57 @@
 {
   "id":"A2","title":"Unilateral tinnitus with asymmetric hearing loss","module":"TinniSense","educationalStatus":"provisional",
   "patient":{"age":42,"sex":"Female","chiefConcern":"Constant left-sided non-pulsatile tinnitus"},
+  "simulation":{
+    "initialTrust":55,
+    "initialEmotion":"concerned",
+    "initialEngagement":60,
+    "patient":{"name":"Anjali","avatar":"A","intro":"Anjali has come to the clinic because of a persistent sound in her left ear. She appears worried and is waiting for you to begin the consultation."},
+    "turns":[
+      {
+        "patient":"I've been hearing this ringing in my left ear. It's been worrying me.",
+        "prompt":"How will you begin the consultation?",
+        "options":[
+          {"id":"a","text":"Tell me more about the sound and what you have noticed about it.","style":"Open-ended, patient-centred","trust":10,"engagement":8,"emotion":"concerned","relevance":1,"empathy":2,"reveals":["Persistent tinnitus","Patient is worried"]},
+          {"id":"b","text":"Don't worry. Tinnitus is usually harmless.","style":"Premature reassurance","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},
+          {"id":"c","text":"Let's skip the history and start the hearing test.","style":"Test-first approach","trust":-5,"engagement":-5,"relevance":0}
+        ]
+      },
+      {
+        "patient":"It is mostly there every day. I first noticed it about six months ago.",
+        "prompt":"Which question is most useful next?",
+        "options":[
+          {"id":"a","text":"Is the sound in one ear or both, and is it rhythmic or pulse-synchronous?","style":"Targeted tinnitus history","trust":8,"engagement":8,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Six-month duration","Left-sided tinnitus","Non-pulsatile presentation"]},
+          {"id":"b","text":"Do you normally watch television at night?","style":"Low-yield question","relevance":0},
+          {"id":"c","text":"Are you sure it is really tinnitus?","style":"Invalidating response","trust":-10,"engagement":-8,"emotion":"anxious","harm":1}
+        ]
+      },
+      {
+        "patient":"Only my left ear. It isn't beating with my pulse. I also feel like my hearing on that side isn't as good as it used to be.",
+        "prompt":"The patient has now disclosed unilateral symptoms and perceived hearing difficulty. What should you explore?",
+        "options":[
+          {"id":"a","text":"Ask about sudden changes, neurological symptoms, ear history, noise exposure and other associated symptoms.","style":"Safety-focused exploration","trust":10,"engagement":10,"emotion":"concerned","relevance":2,"empathy":1,"reveals":["Perceived left hearing reduction","Need to screen associated symptoms"]},
+          {"id":"b","text":"Tell her that unilateral tinnitus is common and move directly to treatment.","style":"Premature closure","trust":-12,"engagement":-10,"emotion":"anxious","harm":1},
+          {"id":"c","text":"Ask only how loud the tinnitus feels.","style":"Narrow symptom focus","relevance":0}
+        ]
+      },
+      {
+        "patient":"I'm mainly afraid that something serious could be causing it. I just want to know what is happening.",
+        "prompt":"How will you respond before moving to diagnostic testing?",
+        "options":[
+          {"id":"a","text":"Acknowledge the concern, explain that you will investigate the pattern carefully, and tell her what the next steps are.","style":"Empathic + clinically appropriate","trust":12,"engagement":10,"emotion":"reassured","relevance":2,"empathy":3,"reveals":["High concern about serious cause","Patient wants explanation and next steps"]},
+          {"id":"b","text":"There is no reason to be worried until we find something.","style":"Dismissive reassurance","trust":-10,"engagement":-8,"emotion":"anxious","harm":1},
+          {"id":"c","text":"I can't say anything until after the test.","style":"Technically safe but poor communication","trust":-3,"engagement":-2,"relevance":1}
+        ]
+      }
+    ]
+  },
   "stages":[
-    {"id":"history","title":"1. Extract the clinical story","prompt":"Which feature should receive particular attention?","options":[{"id":"a","text":"Persistent unilateral tinnitus with asymmetric hearing findings","score":3},{"id":"b","text":"Only tinnitus loudness","score":1},{"id":"c","text":"Whether the patient likes hearing aids","score":0}],"feedback":"The specified case centers on unilateral tinnitus with asymmetric hearing loss, so laterality and asymmetry are key features."},
+    {"id":"history","title":"1. Integrate the clinical story","prompt":"After your patient interaction, which feature should receive particular attention?","options":[{"id":"a","text":"Persistent unilateral tinnitus with asymmetric hearing findings","score":3},{"id":"b","text":"Only tinnitus loudness","score":1},{"id":"c","text":"Whether the patient likes hearing aids","score":0}],"feedback":"The interaction has revealed unilateral tinnitus, perceived hearing reduction and concern. Laterality and asymmetry are key features."},
     {"id":"findings","title":"2. Interpret the findings","prompt":"The case includes asymmetric SNHL, normal tympanograms and absent left acoustic reflexes. What is the appropriate interpretation?","options":[{"id":"a","text":"The pattern warrants consideration of a retrocochlear red flag and further medical evaluation","score":3},{"id":"b","text":"The findings confirm a benign tinnitus cause","score":0},{"id":"c","text":"Normal tympanograms rule out further referral","score":0}],"feedback":"The supplied findings are intended to represent a retrocochlear red-flag pattern requiring appropriate referral rather than a definitive diagnosis."},
     {"id":"redflags","title":"3. Check for red flags","prompt":"What should the student do with this presentation?","options":[{"id":"a","text":"Recognize unilateral/asymmetric findings as a referral trigger and recommend appropriate ENT/medical assessment","score":3},{"id":"b","text":"Proceed directly to sound therapy without referral","score":0},{"id":"c","text":"Ignore asymmetry because tinnitus is common","score":0}],"feedback":"The protocol explicitly identifies unilateral non-pulsatile tinnitus with asymmetric hearing loss as a retrocochlear red flag."},
     {"id":"management","title":"4. Select management","prompt":"What is the appropriate immediate management direction?","options":[{"id":"a","text":"Prioritize medical/ENT evaluation before treating the tinnitus as an uncomplicated presentation","score":3},{"id":"b","text":"Fit hearing aids immediately without further assessment","score":0},{"id":"c","text":"Recommend complete sound avoidance","score":0}],"feedback":"Referral is the priority when the specified red-flag pattern is present."},
     {"id":"justify","title":"5. Justify the decision","prompt":"Which justification is most defensible?","options":[{"id":"a","text":"Unilateral tinnitus plus asymmetric hearing findings can indicate a need to investigate retrocochlear pathology, so referral is appropriate","score":3},{"id":"b","text":"All unilateral tinnitus is automatically a confirmed tumor","score":0},{"id":"c","text":"The audiogram is irrelevant to tinnitus reasoning","score":0}],"feedback":"The case supports concern and referral, not a definitive diagnosis. The distinction is important for clinical reasoning."},
     {"id":"followup","title":"6. Plan follow-up","prompt":"After referral, what should audiology contribute?","options":[{"id":"a","text":"Track hearing/tinnitus status and incorporate medical findings into later individualized management","score":3},{"id":"b","text":"Close the case permanently","score":0},{"id":"c","text":"Monitor only tinnitus pitch","score":0}],"feedback":"Follow-up should integrate subsequent medical information with ongoing hearing and tinnitus needs."}
-  ],"maxScore":18
+  ],
+  "maxScore":18
 }
