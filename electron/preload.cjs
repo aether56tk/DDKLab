@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('ddklab', Object.freeze({
   },
   storage: {
     saveSession: (session) => ipcRenderer.invoke('storage:saveSession', session),
+    saveAudio: (audio) => ipcRenderer.invoke('storage:saveAudio', audio),
     listSessions: () => ipcRenderer.invoke('storage:listSessions'),
     loadSession: (id) => ipcRenderer.invoke('storage:loadSession', id)
   }
