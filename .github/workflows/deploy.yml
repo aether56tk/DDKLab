@@ -28,7 +28,7 @@ jobs:
         run: |
           rm -rf dist
           mkdir -p dist
-          cp index.html manifest.webmanifest sw.js dist/
+          cp index.html manifest.webmanifest sw.js 404.html dist/
           touch dist/.nojekyll
 
       - name: Setup Pages
