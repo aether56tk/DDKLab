@@ -2,9 +2,22 @@
 
 **Local-only Diadochokinetic (DDK) analysis application.**
 
-## Scope
+## Current build
 
-DDKLab is focused exclusively on DDK recording, waveform inspection, deterministic event detection, human verification, local storage, and research-oriented export.
+The repository now contains an Electron application foundation with local microphone recording, waveform rendering, preliminary deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and an OS-backed application PIN gate.
+
+### Run
+
+Install Node.js, then from the repository root:
+
+```bash
+npm install
+npm start
+```
+
+The app opens as a desktop application. It does not require Firebase, Supabase, or a cloud backend.
+
+## DDK rules
 
 ### AMR
 - PA
@@ -30,8 +43,9 @@ DDKLab is intentionally local-only:
 - No Gemini in the measurement path
 - No browser localStorage/IndexedDB as the application data layer
 - Audio and results remain on the device
+- Electron context isolation and sandboxing are enabled
 
-The target is a packaged application using the native/local persistence mechanisms of its target platform.
+Session metadata and recordings are written under the operating system's application-data directory. The application PIN uses Electron's OS-backed `safeStorage` facility when available.
 
 ## Measurement pipeline
 
@@ -57,52 +71,28 @@ Final DDK measurements
 Local storage / export
 ```
 
-The detector must distinguish multiple acoustic maxima belonging to one production from genuinely separate productions. Uncertain events must be flagged for review rather than guessed.
+The current detector is a **PRELIMINARY** envelope/temporal detector. It is not yet research-validated and must not be represented as a clinically validated or perfect peak detector.
 
-## Important validation status
+## Workflow constraints
 
-The initial automatic detector is **PRELIMINARY**. Passing synthetic development tests does not establish research-grade validity. Research-grade validation requires real human DDK recordings with expert annotation and comparison against ground truth.
-
-Do not claim diagnostic accuracy, clinical validation, or 100% accuracy without evidence.
+- One continuous take
+- No pause button
+- No replay button
+- No manual save button
+- Automatic local session storage after processing
+- Waveform is shown for inspection
+- Child mode provides non-clinical reinforcement only
 
 ## Security
 
-The application includes an application-level lock/PIN and platform-supported secure key protection where available. Raw PINs must never be stored. The application must not claim to be impossible to hack; security controls are intended to reduce unauthorized local access.
+The application includes an application-level PIN and OS-backed secure storage where available. Raw PINs are not stored. No application can honestly guarantee that it is impossible to hack; the security layer is designed to reduce unauthorized local access.
 
-## Core workflow
+## Research validation
 
-```text
-START
- ↓
-RECORD ONE CONTINUOUS TAKE
- ↓
-STOP
- ↓
-PROCESS
- ↓
-ANALYZE
- ↓
-WAVEFORM REVIEW
- ↓
-VALID / REVIEW / INVALID
- ↓
-LOCAL SESSION STORAGE
-```
+Passing synthetic or development tests is not evidence of research-grade validity. Validation must use real human DDK recordings with expert ground-truth annotation and should evaluate count error, timing error, precision, recall, and F1 as appropriate.
 
-There is intentionally no pause, replay, or manual save control in the recording workflow.
+Do not claim diagnostic accuracy, clinical validation, or 100% accuracy without evidence.
 
-## Child reinforcement mode
+## Privacy
 
-Child mode may provide simple reinforcement such as a car moving forward when valid target productions/cycles are detected. Reinforcement must never alter the measurement result or fabricate events.
-
-## Research data
-
-Session records should include coded participant/session identifiers, task, target, original recording, automatic events, human annotations, final measurements, validity status, and detector/DSP version information.
-
-Exports should support WAV, CSV, and JSON without uploading participant data.
-
-## Development principle
-
-Measurement correctness takes priority over visual features. Do not replace deterministic DSP with an LLM or speech-analysis API.
-
-The public repository must not contain real participant recordings, names, clinical records, or other identifiable data.
+Do not place real participant recordings, names, clinical records, or other identifiable information in this public repository.
