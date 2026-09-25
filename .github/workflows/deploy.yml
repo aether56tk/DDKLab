@@ -28,8 +28,17 @@ jobs:
         run: |
           rm -rf dist
           mkdir -p dist/research
-          cp index.html manifest.webmanifest sw.js 404.html dist/
+          cp index.html manifest.webmanifest sw.js 404.html ddklab-enhancements.js dist/
           cp research/index.html dist/research/index.html
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('dist/index.html')
+          s = p.read_text(encoding='utf-8')
+          tag = '<script src="./ddklab-enhancements.js"></script>'
+          if tag not in s:
+              s = s.replace('</body>', tag + '</body>')
+          p.write_text(s, encoding='utf-8')
+          PY
           touch dist/.nojekyll
 
       - name: Setup Pages
