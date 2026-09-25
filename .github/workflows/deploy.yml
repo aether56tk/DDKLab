@@ -1,4 +1,4 @@
-name: Deploy Audio-Clinical Lab
+name: Deploy DDKLab
 
 on:
   push:
@@ -22,27 +22,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: lts/*
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
+      - name: Prepare static DDKLab site
+        run: |
+          rm -rf dist
+          mkdir -p dist
+          cp index.html manifest.webmanifest sw.js dist/
+          touch dist/.nojekyll
 
       - name: Setup Pages
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@v5
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Upload DDKLab
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
