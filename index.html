@@ -93,5 +93,6 @@ function historyView(){state.screen='history';app.innerHTML=`${shell('Session Hi
 function boot(){home();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 boot();
 </script>
+<script src="./dsp-v5.js"></script>
 </body>
 </html>
