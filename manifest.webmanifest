@@ -1,0 +1,11 @@
+{
+  "name": "DDKLab",
+  "short_name": "DDKLab",
+  "description": "Local AMR and SMR diadochokinetic analysis",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d",
+  "orientation": "portrait"
+}
