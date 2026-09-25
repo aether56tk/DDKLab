@@ -27,8 +27,9 @@ jobs:
       - name: Prepare static DDKLab site
         run: |
           rm -rf dist
-          mkdir -p dist
+          mkdir -p dist/research
           cp index.html manifest.webmanifest sw.js 404.html dist/
+          cp research/index.html dist/research/index.html
           touch dist/.nojekyll
 
       - name: Setup Pages
