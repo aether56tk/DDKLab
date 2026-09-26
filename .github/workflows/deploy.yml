@@ -28,7 +28,7 @@ jobs:
         run: |
           rm -rf dist
           mkdir -p dist/research
-          cp index.html manifest.webmanifest sw.js 404.html ddklab-enhancements.js dist/
+          cp index.html dsp-v5.js manifest.webmanifest sw.js 404.html ddklab-enhancements.js dist/
           cp research/index.html dist/research/index.html
           python - <<'PY'
           from pathlib import Path
