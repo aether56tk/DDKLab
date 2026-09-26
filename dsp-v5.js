@@ -6,14 +6,9 @@
    - v13 could reject real productions because its activity gate became too high.
    - earlier versions could count several local maxima inside one production.
 
-   Strategy:
-   1) DC removal
-   2) 10-ms RMS energy envelope
-   3) 40–55-ms smoothing depending on clinical mode
-   4) robust percentile noise/activity threshold
-   5) production-scale peak prominence (not tiny local maxima)
-   6) non-maximum suppression with a clinical-mode refractory interval
-   7) edge/transient rejection
+   Strategy: DC removal, 10-ms RMS envelope, clinical-mode smoothing,
+   robust percentile threshold, production-scale prominence, non-maximum
+   suppression, shoulder suppression and edge/transient rejection.
 */
 (function(){
 'use strict';
@@ -31,49 +26,33 @@ function localMin(a,l,r){l=Math.max(0,l);r=Math.min(a.length-1,r);let m=Infinity
 function detect(audio,sr,mode,isSMR){
   if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v14',reason:'empty'}};
   const cfg=CFG[mode]||CFG.Adult;
-
-  // Remove microphone/DC offset without altering the speech envelope.
   const n0=Math.min(audio.length,Math.round(sr*.20));
   let dc=0;for(let i=0;i<n0;i++)dc+=audio[i];dc/=Math.max(1,n0);
   const x=new Float32Array(audio.length);for(let i=0;i<audio.length;i++)x[i]=audio[i]-dc;
-
   const z=envelope(x,sr);if(z.e.length<50)return {events:[],duration:audio.length/sr,debug:{version:'DSP-v14',reason:'too_short'}};
   const raw=Float64Array.from(z.e);
   const smoothN=Math.max(2,Math.round(cfg.smoothMs/1000/z.step));
   const e=movingAverage(raw,smoothN);
-
-  // Robust energy statistics. Percentiles are used instead of a fixed amplitude
-  // threshold because phone microphones and speakers have very different gains.
-  const p05=q(e,.05),p10=q(e,.10),p15=q(e,.15),p20=q(e,.20),p50=q(e,.50),p85=q(e,.85),p90=q(e,.90),p95=q(e,.95);
+  const p05=q(e,.05),p10=q(e,.10),p15=q(e,.15),p20=q(e,.20),p50=q(e,.50),p90=q(e,.90);
   const noise=Math.max(p05,Math.min(p20,(p10+p15+p20)/3));
   const span=Math.max(p90-noise,1e-9);
   const activityFloor=noise+span*cfg.thresholdFrac;
   const absoluteFloor=Math.max(noise*1.15,p50*0.045);
   const threshold=Math.max(activityFloor,absoluteFloor);
   const promFloor=Math.max(span*cfg.promFrac,noise*.10,1e-5);
-
-  // Candidate production peaks.
   const half=Math.max(3,Math.round(cfg.promWindowMs/1000/z.step));
   const candidates=[];
   const edge=Math.round(.12/z.step);
   for(let i=half;i<e.length-half;i++){
     const v=e[i];
-    if(v<threshold)continue;
-    if(v<e[i-1]||v<e[i+1])continue;
-    const left=localMin(e,i-half,i-2);
-    const right=localMin(e,i+2,i+half);
-    // Use the higher surrounding valley as the baseline. This requires a peak
-    // to rise out of both sides of its neighbourhood, suppressing internal ripples.
+    if(v<threshold||v<e[i-1]||v<e[i+1])continue;
+    const left=localMin(e,i-half,i-2),right=localMin(e,i+2,i+half);
     const base=Math.max(noise,Math.max(left,right));
     const prominence=v-base;
     if(prominence<promFloor)continue;
     const score=(prominence/span)*.65+((v-noise)/span)*.35;
     candidates.push({i,v,prominence,score});
   }
-
-  // Non-maximum suppression: one production should not yield multiple peaks.
-  // The gap is short enough for fast AMR but long enough to suppress consonant
-  // burst + vowel/secondary-maxima pairs within one production.
   const gap=Math.round((isSMR?cfg.minGap+.015:cfg.minGap)/z.step);
   candidates.sort((a,b)=>b.score-a.score);
   const chosen=[];
@@ -82,21 +61,13 @@ function detect(audio,sr,mode,isSMR){
     if(chosen.every(s=>Math.abs(c.i-s.i)>=gap))chosen.push(c);
   }
   chosen.sort((a,b)=>a.i-b.i);
-
-  // Final shoulder suppression. If two accepted peaks are still within 170 ms,
-  // keep the stronger production-scale peak rather than counting both.
-  const shoulder=Math.round((isSMR?.190:.170)/z.step);
+  const shoulder=Math.round((isSMR ? .190 : .170)/z.step);
   const final=[];
   for(const c of chosen){
     const prev=final[final.length-1];
-    if(prev&&c.i-prev.i<shoulder){
-      if(c.score>prev.score)final[final.length-1]=c;
-    }else final.push(c);
+    if(prev&&c.i-prev.i<shoulder){if(c.score>prev.score)final[final.length-1]=c;}
+    else final.push(c);
   }
-
-  // If the strict pass finds nothing, run a conservative region fallback. This
-  // prevents a quiet speaker from becoming a false zero while retaining one event
-  // per broad energy region.
   let output=final;
   let fallbackUsed=false;
   if(output.length===0){
@@ -120,21 +91,8 @@ function detect(audio,sr,mode,isSMR){
     }
     fallbackUsed=true;
   }
-
   output.sort((a,b)=>a.i-b.i);
-  return {
-    events:output.map(c=>c.i*z.step),
-    duration:audio.length/sr,
-    debug:{
-      version:'DSP-v14',
-      method:'10-ms RMS + adaptive percentile threshold + production-scale prominence + non-maximum suppression',
-      sampleRate:sr,mode,isSMR:!!isSMR,
-      noiseFloor:noise,activityFloor:threshold,prominenceFloor:promFloor,
-      minGapSeconds:cfg.minGap,promWindowMs:cfg.promWindowMs,
-      smoothingMs:cfg.smoothMs,rawCandidates:candidates.length,
-      selected:output.length,fallbackUsed
-    }
-  };
+  return {events:output.map(c=>c.i*z.step),duration:audio.length/sr,debug:{version:'DSP-v14',method:'10-ms RMS + adaptive percentile threshold + production-scale prominence + non-maximum suppression',sampleRate:sr,mode,isSMR:!!isSMR,noiseFloor:noise,activityFloor:threshold,prominenceFloor:promFloor,minGapSeconds:cfg.minGap,promWindowMs:cfg.promWindowMs,smoothingMs:cfg.smoothMs,rawCandidates:candidates.length,selected:output.length,fallbackUsed}};
 }
 window.detectDDK=detect;
 window.DDK_DSP_VERSION='DSP-v14';
