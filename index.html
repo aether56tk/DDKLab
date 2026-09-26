@@ -11,31 +11,28 @@
 <body><main><div id="app"></div></main>
 <script>
 'use strict';
-const STORAGE_KEY='ddklab.sessions.v6';
+const STORAGE_KEY='ddklab.sessions.v7';
 const state={mode:'Adult',task:'AMR PA',age:'',pid:'',running:false,startTime:0,sampleRate:48000,pcm:[],events:[],stream:null,ctx:null,source:null,processor:null,silent:null,raf:0,audio:null};
 let sessions=[];try{sessions=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(sessions))sessions=[];}catch(e){sessions=[];}
 
-/* Reference values are shown as research comparison guides, not diagnostic cut-offs.
-   Adult AMR means: Portnoy & Aronson (1982): PA 6.4, TA 6.1, KA 5.7 syll/s.
-   Very-old ranges: Motor-Speech Performance in Very Old Speakers (2025): PA 4.6-7.6,
-   TA 4.6-7.4, KA 4.0-7.0, PATAKA 3.0-7.8 syll/s.
-   Child developmental guide uses published English/Greek age-specific reference data;
-   language and task differences must be considered before clinical interpretation.
+/* Published reference data used only as comparison guides.
+   Kent et al. (1987), Table 12, reports child maximum-repetition means and adult ranges of means.
+   Portnoy & Aronson (1982) reports normal-adult AMR means of 6.4, 6.1 and 5.7 syll/s for PA, TA and KA.
+   A 2025 very-old-speaker study reports ranges for PA, TA, KA and PATAKA.
+   These are not universal diagnostic cut-offs; language, protocol and population matter.
 */
 const childGuide={
-  4:{pa:[3.7,4.8],ta:[3.4,4.7],ka:[3.2,4.6],pataka:[3.0,4.4]},
-  5:{pa:[3.8,5.2],ta:[3.6,5.0],ka:[3.4,4.9],pataka:[3.2,4.6]},
-  6:{pa:[3.9,5.4],ta:[3.8,5.2],ka:[3.6,5.1],pataka:[3.4,4.8]},
-  7:{pa:[4.0,5.6],ta:[3.9,5.4],ka:[3.7,5.3],pataka:[3.6,5.1]},
-  8:{pa:[4.2,5.8],ta:[4.0,5.6],ka:[3.8,5.5],pataka:[3.8,5.3]},
-  9:{pa:[4.3,6.0],ta:[4.1,5.8],ka:[3.9,5.7],pataka:[4.0,5.5]},
-  10:{pa:[4.4,6.1],ta:[4.2,5.9],ka:[4.0,5.8],pataka:[4.2,5.7]},
-  11:{pa:[4.5,6.2],ta:[4.3,6.0],ka:[4.1,5.9],pataka:[4.3,5.9]},
-  12:{pa:[4.6,6.3],ta:[4.4,6.1],ka:[4.2,6.0],pataka:[4.4,6.0]},
-  13:{pa:[4.7,6.4],ta:[4.5,6.2],ka:[4.3,6.1],pataka:[4.5,6.1]}
+  6:{pa:[4.2,4.2],ta:[4.1,4.1],ka:[3.6,3.6],pataka:[1.0,1.0]},
+  7:{pa:[4.7,4.7],ta:[4.1,4.1],ka:[3.8,3.8],pataka:[1.0,1.0]},
+  8:{pa:[4.8,4.8],ta:[4.6,4.6],ka:[4.2,4.2],pataka:[1.2,1.2]},
+  9:{pa:[5.0,5.0],ta:[4.9,4.9],ka:[4.4,4.4],pataka:[1.3,1.3]},
+  10:{pa:[5.4,5.4],ta:[5.3,5.3],ka:[4.6,4.6],pataka:[1.4,1.4]},
+  11:{pa:[5.6,5.6],ta:[5.6,5.6],ka:[5.0,5.0],pataka:[1.5,1.5]},
+  12:{pa:[5.9,5.9],ta:[5.7,5.7],ka:[5.1,5.1],pataka:[1.6,1.6]},
+  14:{pa:[6.1,6.1],ta:[6.1,6.1],ka:[5.4,5.4],pataka:[1.8,1.8]}
 };
-const adultRef={pa:[6.4,null],ta:[6.1,null],ka:[5.7,null],pataka:[8.94,null]};
-const geriatricRef={pa:[4.6,7.6],ta:[4.6,7.4],ka:[4.0,7.0],pataka:[3.0,7.8]};
+const adultRef={pa:[6.0,7.0],ta:[6.0,7.0],ka:[5.0,6.5],pataka:[2.5,2.5]};
+const geriatricRef={pa:[4.6,7.6],ta:[4.6,7.4],ka:[4.0,7.0],pataka:[3.0/3,7.8/3]};
 function $(id){return document.getElementById(id)}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function saveSessions(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions.slice(0,100)))}catch(e){}}
@@ -62,56 +59,33 @@ function detectEvents(audio,sr,mode){
  const high=Math.max(noise*1.7,q60*.42,q85*.30),low=Math.max(noise*1.35,high*.52);
  const minGap={Adult:.095,Child:.075,Geriatric:.105,Dysarthria:.115}[mode]||.095;
  const release=Math.max(3,Math.round(.085*sr/hop));const cand=[];let on=false,start=0,peak=0,last=0;
- for(let i=0;i<sm.length;i++){
-   if(!on){if(sm[i]>=high){on=true;start=i;peak=i;last=i}}
-   else{if(sm[i]>sm[peak])peak=i;if(sm[i]>=low)last=i;if(i-last>=release){if(peak-start>=1)cand.push(peak*hop/sr);on=false}}
- }
- if(on)cand.push(peak*hop/sr);
- const out=[];for(const t of cand)if(!out.length||t-out[out.length-1]>=minGap)out.push(t);return out;
+ for(let i=0;i<sm.length;i++){if(!on){if(sm[i]>=high){on=true;start=i;peak=i;last=i}}else{if(sm[i]>sm[peak])peak=i;if(sm[i]>=low)last=i;if(i-last>=release){if(peak-start>=1)cand.push(peak*hop/sr);on=false}}}
+ if(on)cand.push(peak*hop/sr);const out=[];for(const t of cand)if(!out.length||t-out[out.length-1]>=minGap)out.push(t);return out;
 }
 function drawWave(audio,events){
  const s=$('waveSvg');if(!s)return;const W=1100,H=260;let path='';
- if(audio.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0;const a=Math.min(audio.length-1,x*step),b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=H/2-v*H*.9;path+=(x?' L':'M')+' '+x+' '+y;if(v>.015)path+=' M '+x+' '+(H/2+v*H*.9)}}
+ if(audio.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0;const a=Math.min(audio.length-1,x*step),b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=H/2-v*H*.9;path+=(x?' L':'M')+' '+x+' '+y}}
  s.innerHTML='<rect x="0" y="0" width="1100" height="260" fill="#07080b"/><line x1="0" y1="130" x2="1100" y2="130" stroke="#252830"/>'+(path?'<path d="'+path+'" fill="none" stroke="#7dd3fc" stroke-width="1.5"/>':'<text x="550" y="130" text-anchor="middle" fill="#666b75" font-size="16">Waveform will appear after recording</text>')+events.map(t=>'<line x1="'+Math.max(0,Math.min(W,t/15*W))+'" y1="0" x2="'+Math.max(0,Math.min(W,t/15*W))+'" y2="260" stroke="#ffd166" stroke-width="2"/>').join('');
 }
 async function startRecording(){
  if(state.running)return;if(!navigator.mediaDevices?.getUserMedia){$('recordStatus').textContent='Microphone access is unavailable here.';return}
  $('recordBtn').disabled=true;$('recordBtn').textContent='PREPARING MICROPHONE…';$('recordStatus').textContent='Requesting microphone access…';
- try{
-  state.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-  state.ctx=new (window.AudioContext||window.webkitAudioContext)();await state.ctx.resume();state.sampleRate=state.ctx.sampleRate;
-  state.source=state.ctx.createMediaStreamSource(state.stream);state.processor=state.ctx.createScriptProcessor(4096,1,1);state.silent=state.ctx.createGain();state.silent.gain.value=0;
-  state.processor.onaudioprocess=e=>{if(state.running)state.pcm.push(new Float32Array(e.inputBuffer.getChannelData(0)))};
-  state.source.connect(state.processor);state.processor.connect(state.silent);state.silent.connect(state.ctx.destination);
-  state.running=true;state.pcm=[];state.events=[];state.startTime=performance.now();$('recordBtn').textContent='RECORDING…';$('recordStatus').textContent='Listening… 15-second acquisition in progress.';
-  const tick=now=>{if(!state.running)return;const elapsed=(now-state.startTime)/1000,remain=Math.max(0,15-elapsed);$('timer').textContent=Math.ceil(remain);if(state.mode==='Child')$('car').style.left=Math.min(92,elapsed/15*92)+'%';if(elapsed>=15){finishRecording();return}state.raf=requestAnimationFrame(tick)};state.raf=requestAnimationFrame(tick);
- }catch(err){state.running=false;$('recordBtn').disabled=false;$('recordBtn').textContent='START 15-SECOND RECORDING';$('recordStatus').textContent='Microphone error: '+(err?.message||'permission denied');cleanupAudio()}
+ try{state.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});state.ctx=new (window.AudioContext||window.webkitAudioContext)();await state.ctx.resume();state.sampleRate=state.ctx.sampleRate;state.source=state.ctx.createMediaStreamSource(state.stream);state.processor=state.ctx.createScriptProcessor(4096,1,1);state.silent=state.ctx.createGain();state.silent.gain.value=0;state.processor.onaudioprocess=e=>{if(state.running)state.pcm.push(new Float32Array(e.inputBuffer.getChannelData(0)))};state.source.connect(state.processor);state.processor.connect(state.silent);state.silent.connect(state.ctx.destination);state.running=true;state.pcm=[];state.events=[];state.startTime=performance.now();$('recordBtn').textContent='RECORDING…';$('recordStatus').textContent='Listening… 15-second acquisition in progress.';const tick=now=>{if(!state.running)return;const elapsed=(now-state.startTime)/1000,remain=Math.max(0,15-elapsed);$('timer').textContent=Math.ceil(remain);if(state.mode==='Child')$('car').style.left=Math.min(92,elapsed/15*92)+'%';if(elapsed>=15){finishRecording();return}state.raf=requestAnimationFrame(tick)};state.raf=requestAnimationFrame(tick)}catch(err){state.running=false;$('recordBtn').disabled=false;$('recordBtn').textContent='START 15-SECOND RECORDING';$('recordStatus').textContent='Microphone error: '+(err?.message||'permission denied');cleanupAudio()}
 }
 function flattenChunks(){let total=0;for(const c of state.pcm)total+=c.length;const o=new Float32Array(total);let p=0;for(const c of state.pcm){o.set(c,p);p+=c.length}return o}
 function cleanupAudio(){try{state.processor?.disconnect();state.source?.disconnect();state.silent?.disconnect();state.stream?.getTracks().forEach(t=>t.stop());state.ctx?.close()}catch(e){}state.processor=null;state.source=null;state.silent=null;state.stream=null;state.ctx=null}
-function finishRecording(){
- cancelAnimationFrame(state.raf);state.running=false;const audio=flattenChunks();state.audio=audio;state.events=detectEvents(audio,state.sampleRate,state.mode);cleanupAudio();$('timer').textContent='0';$('liveCount').textContent=state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length;drawWave(audio,state.events);$('recordBtn').disabled=false;$('recordBtn').textContent='VIEW RESULT';$('recordBtn').onclick=resultView;$('recordStatus').textContent='Processing complete. Captured '+audio.length+' samples at '+state.sampleRate+' Hz.';if(state.mode==='Child')$('car').style.left='92%';
-}
-function reference(){
- const key=state.task==='AMR PA'?'pa':state.task==='AMR TA'?'ta':state.task==='AMR KA'?'ka':'pataka';
- if(state.mode==='Geriatric')return {kind:'range',range:geriatricRef[key],source:'Motor-Speech Performance in Very Old Speakers (2025)'};
- if(state.mode==='Adult'||state.mode==='Dysarthria')return {kind:'mean',mean:adultRef[key][0],source:'Portnoy & Aronson (1982) normal adults'};
- const age=Math.round(Number(state.age));if(childGuide[age])return {kind:'range',range:childGuide[age][key],source:'Published developmental DDK reference guide; language/task differences apply'};
- return null;
-}
+function finishRecording(){cancelAnimationFrame(state.raf);state.running=false;const audio=flattenChunks();state.audio=audio;state.events=detectEvents(audio,state.sampleRate,state.mode);cleanupAudio();$('timer').textContent='0';$('liveCount').textContent=state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length;drawWave(audio,state.events);$('recordBtn').disabled=false;$('recordBtn').textContent='VIEW RESULT';$('recordBtn').onclick=resultView;$('recordStatus').textContent='Processing complete. Captured '+audio.length+' samples at '+state.sampleRate+' Hz.';if(state.mode==='Child')$('car').style.left='92%'}
+function reference(){const key=state.task==='AMR PA'?'pa':state.task==='AMR TA'?'ta':state.task==='AMR KA'?'ka':'pataka';if(state.mode==='Geriatric')return {range:geriatricRef[key],source:'Motor-Speech Performance in Very Old Speakers (2025)',unit:key==='pataka'?'cycles/s':'syllables/s'};if(state.mode==='Adult'||state.mode==='Dysarthria')return {range:adultRef[key],source:'Kent et al. (1987) / Portnoy & Aronson (1982) normal-adult reference data',unit:key==='pataka'?'cycles/s':'syllables/s'};const age=Math.round(Number(state.age));if(childGuide[age])return {range:childGuide[age][key],source:'Kent et al. (1987), Table 12; child maximum-repetition reference values',unit:key==='pataka'?'cycles/s':'syllables/s'};return null}
 function clinicalCount(){return state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length}
 function rate(){return clinicalCount()/15}
-function compare(){const r=reference(),v=rate();if(!r)return {label:'REFERENCE AGE NOT AVAILABLE',class:'warn'};if(r.kind==='mean'){const lo=r.mean*.85,hi=r.mean*1.15;return {label:v<lo?'BELOW REFERENCE':v>hi?'ABOVE REFERENCE':'NEAR REFERENCE',class:v<lo?'warn':'good',detail:'Reference mean '+r.mean.toFixed(2)+' syl/s; comparison band ±15% is a display aid, not a validated clinical cut-off.'}}const [lo,hi]=r.range;return {label:v<lo?'BELOW REFERENCE':v>hi?'ABOVE REFERENCE':'WITHIN REFERENCE RANGE',class:v<lo||v>hi?'warn':'good',detail:'Reference '+lo.toFixed(2)+'–'+hi.toFixed(2)+' syl/s.'}}
+function compare(){const r=reference(),v=rate();if(!r)return {label:'AGE-MATCHED REFERENCE NOT AVAILABLE',class:'warn',detail:'Published table does not provide this exact age in the current reference set.'};const lo=r.range[0],hi=r.range[1];if(lo===hi){const tol=lo*.15;return {label:v<lo-tol?'BELOW REFERENCE':v>lo+tol?'ABOVE REFERENCE':'NEAR REFERENCE',class:v<lo-tol||v>lo+tol?'warn':'good',detail:'Reference value '+lo.toFixed(2)+' '+r.unit+'; ±15% is only a display aid, not a validated clinical cut-off.'}}return {label:v<lo?'BELOW REFERENCE':v>hi?'ABOVE REFERENCE':'WITHIN REFERENCE RANGE',class:v<lo||v>hi?'warn':'good',detail:'Reference range '+lo.toFixed(2)+'–'+hi.toFixed(2)+' '+r.unit+'.'}}
+function expected15(){const r=reference();if(!r)return null;return [r.range[0]*15,r.range[1]*15]}
 function resultView(){
- const c=clinicalCount(),r=rate(),ref=reference(),cmp=compare(),duration=state.audio?state.audio.length/state.sampleRate:0;
- const refText=ref?(ref.kind==='mean'?('Mean '+ref.mean.toFixed(2)+' syl/s'):('Range '+ref.range[0].toFixed(2)+'–'+ref.range[1].toFixed(2)+' syl/s')):'No age-matched reference loaded';
- $('app').innerHTML=shell('DDK Result')+'<div class="stack"><div class="card"><div class="stats"><div class="stat">Raw events<b>'+state.events.length+'</b></div><div class="stat">Clinical count<b>'+c+'</b></div><div class="stat">Rate<b>'+r.toFixed(2)+'/s</b></div></div></div><div class="card"><h3 style="margin-top:0">15-second normative comparison</h3><div class="pill '+cmp.class+'">'+esc(cmp.label)+'</div><p><b>Expected reference:</b> '+esc(refText)+'</p><div class="status">'+esc(cmp.detail||'')+'</div><div class="source" style="margin-top:9px">'+esc(ref?.source||'Reference source not applicable')+'</div></div><div class="card"><h3 style="margin-top:0">Waveform verification</h3><svg id="resultWave" class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none"></svg><div class="status" style="margin-top:8px">'+state.events.length+' automatic candidate markers. For research use, verify each marker against the waveform and human annotation.</div></div><div class="card"><h3 style="margin-top:0">Final report</h3><div class="report">DDKLab — PRELIMINARY DSP REPORT\nParticipant: '+esc(state.pid)+'\nMode: '+esc(state.mode)+'\nTask: '+esc(state.task)+'\nProtocol: 15 seconds\nCaptured duration: '+duration.toFixed(2)+' s\nSample rate: '+state.sampleRate+' Hz\nRaw candidate events: '+state.events.length+'\nClinical count: '+c+(state.task==='SMR PATAKA'?' complete cycles':'')+'\nRate: '+r.toFixed(2)+' /s\nReference: '+refText+'\nComparison: '+cmp.label+'\n\nPRELIMINARY — not a diagnosis. Human waveform verification is required for research validation.</div></div><button class="btn" id="doneBtn">FINISH & STORE LOCALLY</button></div>';
- drawWave(state.audio,state.events);const rw=$('resultWave');if(rw)rw.outerHTML=$('waveSvg')?$('waveSvg').outerHTML.replace('id="waveSvg"','id="resultWave"'):rw.outerHTML;const rr=$('resultWave');if(rr){const old=$('waveSvg');if(old){}rr.outerHTML=buildWaveSvg(state.audio,state.events)}
+ const c=clinicalCount(),r=rate(),ref=reference(),cmp=compare(),e15=expected15(),duration=state.audio?state.audio.length/state.sampleRate:0;const refText=ref?(e15&&e15[0]!==e15[1]?ref.range[0].toFixed(2)+'–'+ref.range[1].toFixed(2)+' '+ref.unit+'  •  15-sec expected '+Math.round(e15[0])+'–'+Math.round(e15[1])+(ref.unit==='cycles/s'?' cycles':' syllables'):ref.range[0].toFixed(2)+' '+ref.unit+'  •  15-sec expected ≈'+Math.round(e15[0])+(ref.unit==='cycles/s'?' cycles':' syllables')):'No age-matched reference loaded';
+ $('app').innerHTML=shell('DDK Result')+'<div class="stack"><div class="card"><div class="stats"><div class="stat">Raw events<b>'+state.events.length+'</b></div><div class="stat">Clinical count<b>'+c+'</b></div><div class="stat">Rate<b>'+r.toFixed(2)+'/s</b></div></div></div><div class="card"><h3 style="margin-top:0">15-second normative comparison</h3><div class="pill '+cmp.class+'">'+esc(cmp.label)+'</div><p><b>Expected reference:</b> '+esc(refText)+'</p><div class="status">Observed: '+r.toFixed(2)+' '+(ref?.unit||'units')+'. '+esc(cmp.detail)+'</div><div class="source" style="margin-top:9px">'+esc(ref?.source||'Reference source not available')+'</div></div><div class="card"><h3 style="margin-top:0">Waveform verification</h3>'+buildWaveSvg(state.audio,state.events)+'<div class="status" style="margin-top:8px">'+state.events.length+' automatic candidate markers. Verify each marker against the waveform and human annotation.</div></div><div class="card"><h3 style="margin-top:0">Final report</h3><div class="report">DDKLab — PRELIMINARY DSP REPORT\nParticipant: '+esc(state.pid)+'\nMode: '+esc(state.mode)+'\nTask: '+esc(state.task)+'\nProtocol: 15 seconds\nCaptured duration: '+duration.toFixed(2)+' s\nSample rate: '+state.sampleRate+' Hz\nRaw candidate events: '+state.events.length+'\nClinical count: '+c+(state.task==='SMR PATAKA'?' complete cycles':'')+'\nObserved rate: '+r.toFixed(2)+' /s\nExpected reference: '+refText+'\nComparison: '+cmp.label+'\n\nPRELIMINARY — not a diagnosis. Human waveform verification is required for research validation.</div></div><button class="btn" id="doneBtn">FINISH & STORE LOCALLY</button></div>';
  $('backBtn').onclick=setupView;$('doneBtn').onclick=()=>{sessions.unshift({time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,raw:state.events.length,count:c,rate:r});saveSessions();home()};
 }
-function buildWaveSvg(audio,events){const W=1100,H=260;let p='';if(audio?.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0,a=x*step,b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=130-v*234;p+=(x?' L':'M')+' '+x+' '+y;p+=' M '+x+' '+(130+v*234)}}return '<svg id="resultWave" class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none"><rect width="1100" height="260" fill="#07080b"/><line x1="0" y1="130" x2="1100" y2="130" stroke="#252830"/>'+(p?'<path d="'+p+'" fill="none" stroke="#7dd3fc" stroke-width="1.5"/>':'<text x="550" y="130" text-anchor="middle" fill="#777">No waveform captured</text>')+events.map(t=>{const x=Math.max(0,Math.min(W,t/15*W));return '<line x1="'+x+'" y1="0" x2="'+x+'" y2="260" stroke="#ffd166" stroke-width="2"/>'}).join('')+'</svg>'}
-function historyView(){
- $('app').innerHTML=shell('Session History')+'<div class="stack"><div class="card">'+(sessions.length?'<table class="table"><tr><th>Date</th><th>Task</th><th>Count</th><th>Rate</th></tr>'+sessions.map(s=>'<tr><td>'+esc(new Date(s.time).toLocaleString())+'</td><td>'+esc(s.task)+'</td><td>'+esc(s.count)+'</td><td>'+Number(s.rate).toFixed(2)+'/s</td></tr>').join('')+'</table>':'<div class="status">No local sessions stored yet.</div>')+'</div><button class="btn secondary" id="homeBtn">Back to DDKLab</button></div>';$('backBtn').onclick=home;$('homeBtn').onclick=home;
-}
+function buildWaveSvg(audio,events){const W=1100,H=260;let p='';if(audio?.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0,a=Math.min(audio.length-1,x*step),b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=130-v*234;p+=(x?' L':'M')+' '+x+' '+y}}return '<svg class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none"><rect width="1100" height="260" fill="#07080b"/><line x1="0" y1="130" x2="1100" y2="130" stroke="#252830"/>'+(p?'<path d="'+p+'" fill="none" stroke="#7dd3fc" stroke-width="1.5"/>':'<text x="550" y="130" text-anchor="middle" fill="#777">No waveform captured</text>')+events.map(t=>{const x=Math.max(0,Math.min(W,t/15*W));return '<line x1="'+x+'" y1="0" x2="'+x+'" y2="260" stroke="#ffd166" stroke-width="2"/>'}).join('')+'</svg>'}
+function historyView(){$('app').innerHTML=shell('Session History')+'<div class="stack"><div class="card">'+(sessions.length?'<table class="table"><tr><th>Date</th><th>Task</th><th>Count</th><th>Rate</th></tr>'+sessions.map(s=>'<tr><td>'+esc(new Date(s.time).toLocaleString())+'</td><td>'+esc(s.task)+'</td><td>'+esc(s.count)+'</td><td>'+Number(s.rate).toFixed(2)+'/s</td></tr>').join('')+'</table>':'<div class="status">No local sessions stored yet.</div>')+'</div><button class="btn secondary" id="homeBtn">Back to DDKLab</button></div>';$('backBtn').onclick=home;$('homeBtn').onclick=home}
 home();
 </script></body></html>
