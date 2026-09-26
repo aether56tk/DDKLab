@@ -1,143 +1,182 @@
-/* DDKLab DSP v10 — multi-scale DDK production detector.
-   Local-only deterministic DSP. No Gemini/LLM/remote speech service is used.
+/* DDKLab DSP v11 — multi-scale production/event detector.
+   Local-only deterministic DSP. No Gemini/LLM/remote speech service.
 
-   Design goal for DDK: count one production nucleus per syllable, not every
-   small wiggle in the amplitude envelope. The detector therefore combines:
-   1) short-time absolute-energy envelope,
-   2) noise-adaptive normalization,
-   3) positive energy-rise/onset strength,
-   4) local peak prominence,
-   5) a production refractory interval, and
-   6) non-maximum suppression across nearby candidates.
+   This revision is deliberately conservative about what counts as one DDK
+   production. It uses multi-scale energy envelopes, adaptive noise/activity
+   thresholds, onset strength, local prominence, candidate clustering and
+   refractory non-maximum suppression. The goal is to reduce both:
+     - over-counting from intra-syllable wiggles, and
+     - under-counting of weak productions.
 
-   IMPORTANT: this is still a PRELIMINARY detector until validated against
-   human-annotated recordings. It must not be described as clinically perfect.
+   PRELIMINARY: this is an engineering detector, not a clinically validated
+   or "perfect" detector. Research claims require human-annotated validation.
 */
 (function(){
 'use strict';
 
 const CFG={
-  Adult:{minGap:.105, smooth:.030, rise:.018, prom:.045},
-  Child:{minGap:.095, smooth:.025, rise:.014, prom:.035},
-  Geriatric:{minGap:.110, smooth:.032, rise:.018, prom:.045},
-  Dysarthria:{minGap:.085, smooth:.022, rise:.010, prom:.022}
+  Adult:{gap:.085, minProm:.055, act:.075, rise:.16},
+  Child:{gap:.075, minProm:.042, act:.060, rise:.12},
+  Geriatric:{gap:.090, minProm:.050, act:.070, rise:.15},
+  Dysarthria:{gap:.065, minProm:.028, act:.040, rise:.08}
 };
 
-function quantile(a,p){
+function q(a,p){
   if(!a.length)return 0;
   const b=Array.from(a).sort((x,y)=>x-y);
   return b[Math.max(0,Math.min(b.length-1,Math.floor((b.length-1)*p)))];
 }
-function median(a){return quantile(a,.5)}
+function median(a){return q(a,.5)}
 function rms(a,i,w){
   let s=0,n=0;
-  const end=Math.min(a.length,i+w);
-  for(let j=i;j<end;j++){const x=a[j];s+=x*x;n++}
+  const e=Math.min(a.length,i+w);
+  for(let j=i;j<e;j++){const z=a[j];s+=z*z;n++;}
   return Math.sqrt(s/(n||1));
+}
+function smooth(a,n){
+  n=Math.max(1,n); const out=new Float64Array(a.length); let sum=0;
+  for(let i=0;i<a.length;i++){
+    sum+=a[i]; if(i>=n)sum-=a[i-n];
+    out[i]=sum/Math.min(i+1,n);
+  }
+  return out;
+}
+
+function envelope(x,sr,ms){
+  const hop=Math.max(64,Math.round(sr*.005));
+  const win=Math.max(hop*3,Math.round(sr*(ms/1000)));
+  const e=[];
+  for(let i=0;i+win<=x.length;i+=hop)e.push(rms(x,i,win));
+  return {e,hop,step:hop/sr};
 }
 
 function detect(audio,sr,mode,isSMR){
-  if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v10',reason:'empty'}};
-
+  if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v11',reason:'empty'}};
   const cfg=CFG[mode]||CFG.Adult;
-  const hop=Math.max(64,Math.round(sr*.005));       // 5 ms
-  const win=Math.max(hop*3,Math.round(sr*.020));    // 20 ms energy window
-  const step=hop/sr;
-  const env=[];
 
-  let mean=0;
-  const meanN=Math.min(audio.length,Math.round(sr*.25));
-  for(let i=0;i<meanN;i++)mean+=audio[i];
-  mean/=Math.max(1,meanN);
+  /* Remove DC. */
+  let dc=0; const n0=Math.min(audio.length,Math.round(sr*.25));
+  for(let i=0;i<n0;i++)dc+=audio[i]; dc/=Math.max(1,n0);
   const x=new Float32Array(audio.length);
-  for(let i=0;i<audio.length;i++)x[i]=audio[i]-mean;
+  for(let i=0;i<audio.length;i++)x[i]=audio[i]-dc;
 
-  for(let i=0;i+win<=x.length;i+=hop)env.push(rms(x,i,win));
-  if(env.length<40)return {events:[],duration:audio.length/sr,debug:{version:'DSP-v10',reason:'too_short'}};
+  /* Three scales: short captures weak onsets; medium is the primary syllable
+     nucleus; long scale prevents tiny ripples becoming independent events. */
+  const a=envelope(x,sr,12);
+  const b=envelope(x,sr,22);
+  const c=envelope(x,sr,38);
+  if(a.e.length<40)return {events:[],duration:audio.length/sr,debug:{version:'DSP-v11',reason:'too_short'}};
 
-  const smoothFrames=Math.max(2,Math.round(cfg.smooth/step));
-  const sm=new Float64Array(env.length);
-  let acc=0;
-  for(let i=0;i<env.length;i++){
-    acc+=env[i];
-    if(i>=smoothFrames)acc-=env[i-smoothFrames];
-    sm[i]=acc/Math.min(i+1,smoothFrames);
+  const N=b.e.length;
+  const short=smooth(a.e,Math.max(2,Math.round(.015/a.step)));
+  const mid=smooth(b.e,Math.max(2,Math.round(.020/b.step)));
+  const long=smooth(c.e,Math.max(2,Math.round(.035/c.step)));
+
+  /* Interpolate short/long scales onto the medium frame grid. */
+  function interp(arr,t){
+    const k=t/a.step;
+    const i=Math.floor(k), f=k-i;
+    if(i<=0)return arr[0]||0;
+    if(i>=arr.length-1)return arr[arr.length-1]||0;
+    return arr[i]*(1-f)+arr[i+1]*f;
   }
 
-  const q05=quantile(sm,.05), q20=quantile(sm,.20), q35=quantile(sm,.35), q90=quantile(sm,.90);
-  const quiet=Array.from(sm).filter(v=>v<=q35);
-  const noise=median(quiet.length?quiet:[q05]);
-  const dynamic=Math.max(q90-noise,1e-8);
-
-  const activityFrac = mode==='Dysarthria' ? .055 : (mode==='Child' ? .075 : .085);
-  const activity=Math.max(noise+dynamic*activityFrac, q20+dynamic*.015);
-
-  const riseFrames=Math.max(1,Math.round(cfg.rise/step));
-  const rise=new Float64Array(sm.length);
-  for(let i=riseFrames;i<sm.length;i++){
-    rise[i]=Math.max(0,sm[i]-sm[i-riseFrames]);
+  const feat=new Float64Array(N);
+  const rise=new Float64Array(N);
+  for(let i=0;i<N;i++){
+    const t=i*b.step;
+    const s=interp(short,t), m=mid[i], l=interp(long,t);
+    /* Keep the nucleus but discount very slow baseline movement. */
+    feat[i]=Math.max(0,m*.62+s*.23+l*.15);
+    if(i>0)rise[i]=Math.max(0,feat[i]-feat[i-1]);
   }
-  const riseBase=quantile(rise,.50);
-  const riseSpread=Math.max(quantile(rise,.90)-riseBase,1e-8);
-  const riseThreshold=Math.max(riseBase+riseSpread*.20,dynamic*.008);
 
-  const lookFrames=Math.max(5,Math.round(.060/step));
-  const refractoryFrames=Math.max(1,Math.round((isSMR?Math.max(.095,cfg.minGap):cfg.minGap)/step));
+  const low=Array.from(feat).sort((u,v)=>u-v);
+  const p10=q(low,.10), p25=q(low,.25), p50=q(low,.50), p90=q(low,.90);
+  const quiet=Array.from(feat).filter(v=>v<=p25);
+  const noise=median(quiet.length?quiet:[p10]);
+  const dyn=Math.max(p90-noise,1e-9);
 
+  /* Activity is intentionally lower for dysarthria/children, but not zero:
+     noise must still be separated from speech by prominence and rise tests. */
+  const activity=noise+dyn*cfg.act;
+  const promFloor=dyn*cfg.minProm;
+  const riseQ=q(rise,.75);
+  const riseFloor=Math.max(riseQ*cfg.rise,dyn*.004);
+
+  /* Local peak window is wide enough to collapse multiple samples of one
+     vowel/aspiration into one candidate. */
+  const look=Math.max(4,Math.round(.055/b.step));
+  const gapFrames=Math.max(1,Math.round((isSMR?Math.max(.070,cfg.gap):cfg.gap)/b.step));
   const candidates=[];
-  for(let i=lookFrames;i<sm.length-lookFrames;i++){
-    if(sm[i]<activity)continue;
-    if(sm[i]<sm[i-1]||sm[i]<sm[i+1])continue;
-    if(rise[i]<riseThreshold && sm[i]-sm[i-riseFrames]<dynamic*.012)continue;
 
-    let left=sm[i],right=sm[i];
-    for(let k=1;k<=lookFrames;k++){
-      if(sm[i-k]<left)left=sm[i-k];
-      if(sm[i+k]<right)right=sm[i+k];
+  for(let i=look;i<N-look;i++){
+    const v=feat[i];
+    if(v<activity)continue;
+    if(v<feat[i-1] || v<feat[i+1])continue;
+
+    let left=v,right=v;
+    for(let k=1;k<=look;k++){
+      if(feat[i-k]<left)left=feat[i-k];
+      if(feat[i+k]<right)right=feat[i+k];
     }
-    const prominence=sm[i]-Math.max(noise,Math.min(left,right));
-    if(prominence<Math.max(cfg.prom*dynamic,dynamic*.018))continue;
+    const base=Math.max(noise,Math.min(left,right));
+    const prominence=v-base;
+    const r=rise[i];
 
-    const score=(prominence/dynamic)*0.72+(rise[i]/Math.max(dynamic,1e-8))*0.28;
-    candidates.push({i,v:sm[i],prominence,rise:rise[i],score});
+    /* A strong local nucleus OR a clear onset is sufficient. */
+    if(prominence<promFloor && r<riseFloor)continue;
+
+    const relative=(v-noise)/dyn;
+    const ps=prominence/dyn;
+    const rs=r/Math.max(dyn,1e-9);
+    const score=.55*ps+.25*relative+.20*Math.min(rs,2);
+    candidates.push({i,v,prominence,rise:r,score});
   }
 
-  candidates.sort((a,b)=>b.score-a.score);
+  /* Candidate clustering first: if several scales/nearby local maxima describe
+     the same syllable, retain the strongest one. */
+  candidates.sort((u,v)=>u.i-v.i);
+  const clustered=[];
+  for(const cand of candidates){
+    const last=clustered[clustered.length-1];
+    if(last && cand.i-last.i<Math.round(.060/b.step)){
+      if(cand.score>last.score)clustered[clustered.length-1]=cand;
+    }else clustered.push(cand);
+  }
+
+  /* Global NMS: strongest candidate wins inside the production refractory
+     interval. This prevents 36 events from five broad syllable nuclei. */
+  clustered.sort((u,v)=>v.score-u.score);
   const selected=[];
-  for(const c of candidates){
-    let tooClose=false;
-    for(const s of selected){if(Math.abs(c.i-s.i)<refractoryFrames){tooClose=true;break}}
-    if(!tooClose)selected.push(c);
+  for(const cand of clustered){
+    if(selected.every(s=>Math.abs(cand.i-s.i)>=gapFrames))selected.push(cand);
   }
-  selected.sort((a,b)=>a.i-b.i);
+  selected.sort((u,v)=>u.i-v.i);
 
-  const edgeFrames=Math.round(.12/step);
+  /* Reject isolated very-low-confidence edge events. */
   const final=[];
-  for(const c of selected){
-    if((c.i<edgeFrames||c.i>sm.length-edgeFrames) && c.score<.08)continue;
-    final.push(c);
+  for(const cand of selected){
+    const nearEdge=cand.i<Math.round(.10/b.step)||cand.i>N-Math.round(.10/b.step);
+    if(nearEdge && cand.score<.09)continue;
+    final.push(cand);
   }
 
   return {
-    events:final.map(x=>x.i*hop/sr),
+    events:final.map(v=>v.i*b.step),
     duration:audio.length/sr,
     debug:{
-      version:'DSP-v10',
-      method:'multi-scale RMS energy + adaptive noise floor + onset-rise strength + prominence + refractory NMS',
-      threshold:activity,
-      noiseFloor:noise,
-      prominenceFloor:Math.max(cfg.prom*dynamic,dynamic*.018),
-      riseThreshold,
-      refractory:refractoryFrames*step,
-      candidates:candidates.length,
-      selected:final.length,
-      sampleRate:sr,
-      mode,
-      isSMR:!!isSMR
+      version:'DSP-v11',
+      method:'multi-scale RMS envelope + adaptive noise floor + onset strength + prominence + clustering + NMS',
+      sampleRate:sr,mode,isSMR:!!isSMR,
+      activity,noiseFloor:noise,prominenceFloor:promFloor,riseFloor,
+      refractory:gapFrames*b.step,
+      rawCandidates:candidates.length,clustered:clustered.length,selected:final.length,
+      scalesMs:[12,22,38]
     }
   };
 }
 
 window.detectDDK=detect;
-window.DDK_DSP_VERSION='DSP-v10';
+window.DDK_DSP_VERSION='DSP-v11';
 })();
