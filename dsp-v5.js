@@ -45,7 +45,6 @@ function detect(audio,sr,mode,isSMR){
   const step=hop/sr;
   const env=[];
 
-  // Remove DC before envelope extraction.
   let mean=0;
   const meanN=Math.min(audio.length,Math.round(sr*.25));
   for(let i=0;i<meanN;i++)mean+=audio[i];
@@ -56,8 +55,6 @@ function detect(audio,sr,mode,isSMR){
   for(let i=0;i+win<=x.length;i+=hop)env.push(rms(x,i,win));
   if(env.length<40)return {events:[],duration:audio.length/sr,debug:{version:'DSP-v10',reason:'too_short'}};
 
-  // Multi-scale smoothing: enough to suppress carrier/noise wiggles while
-  // preserving the onset of a weak syllable.
   const smoothFrames=Math.max(2,Math.round(cfg.smooth/step));
   const sm=new Float64Array(env.length);
   let acc=0;
@@ -67,19 +64,14 @@ function detect(audio,sr,mode,isSMR){
     sm[i]=acc/Math.min(i+1,smoothFrames);
   }
 
-  // Robust noise estimate from the lower part of the envelope.
   const q05=quantile(sm,.05), q20=quantile(sm,.20), q35=quantile(sm,.35), q90=quantile(sm,.90);
   const quiet=Array.from(sm).filter(v=>v<=q35);
   const noise=median(quiet.length?quiet:[q05]);
   const dynamic=Math.max(q90-noise,1e-8);
 
-  // Gentle adaptive activity threshold. Dysarthria gets a lower threshold,
-  // but the onset/prominence tests still have to agree.
-  const activityFrac=mode==='Dysarthria'?.055:(mode==='Child'?.075:.085);
+  const activityFrac = mode==='Dysarthria' ? .055 : (mode==='Child' ? .075 : .085);
   const activity=Math.max(noise+dynamic*activityFrac, q20+dynamic*.015);
 
-  // Positive energy-rise strength. Each production normally creates one
-  // principal rise; later oscillations in the same syllable are suppressed.
   const riseFrames=Math.max(1,Math.round(cfg.rise/step));
   const rise=new Float64Array(sm.length);
   for(let i=riseFrames;i<sm.length;i++){
@@ -89,8 +81,6 @@ function detect(audio,sr,mode,isSMR){
   const riseSpread=Math.max(quantile(rise,.90)-riseBase,1e-8);
   const riseThreshold=Math.max(riseBase+riseSpread*.20,dynamic*.008);
 
-  // Local prominence window: wide enough to see the valley between adjacent
-  // syllables, but not so wide that a long utterance becomes one peak.
   const lookFrames=Math.max(5,Math.round(.060/step));
   const refractoryFrames=Math.max(1,Math.round((isSMR?Math.max(.095,cfg.minGap):cfg.minGap)/step));
 
@@ -108,14 +98,10 @@ function detect(audio,sr,mode,isSMR){
     const prominence=sm[i]-Math.max(noise,Math.min(left,right));
     if(prominence<Math.max(cfg.prom*dynamic,dynamic*.018))continue;
 
-    // Score rewards a real onset plus a prominent envelope maximum.
     const score=(prominence/dynamic)*0.72+(rise[i]/Math.max(dynamic,1e-8))*0.28;
     candidates.push({i,v:sm[i],prominence,rise:rise[i],score});
   }
 
-  // Non-maximum suppression. If several maxima occur within one syllable,
-  // keep only the strongest one. This is the main correction for the
-  // previous 5->11 and 10->6/13->23 failure patterns.
   candidates.sort((a,b)=>b.score-a.score);
   const selected=[];
   for(const c of candidates){
@@ -125,8 +111,6 @@ function detect(audio,sr,mode,isSMR){
   }
   selected.sort((a,b)=>a.i-b.i);
 
-  // Reject isolated tiny edge events. Do not reject a weak internal event:
-  // dysarthric productions can be genuinely low amplitude.
   const edgeFrames=Math.round(.12/step);
   const final=[];
   for(const c of selected){
