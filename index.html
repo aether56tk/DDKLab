@@ -1,149 +1,117 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0b0d">
-<title>DDKLab</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d"><title>DDKLab</title>
 <style>
 :root{--bg:#0b0b0d;--card:#18191d;--line:#30323a;--text:#f5f7fb;--muted:#a4a8b3;--accent:#18d7b0;--warn:#ffc857;--danger:#ff6b6b;--wave:#7dd3fc;--marker:#ffd166}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}main{width:min(860px,100%);margin:auto;padding:16px}.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.brand{font-size:27px;font-weight:850}.sub{font-size:12px;color:var(--muted)}.hero{text-align:center;padding:44px 8px 26px}.hero h1{font-size:38px;margin:12px 0}.hero p{color:#d5d7dd;line-height:1.55}.stack{display:grid;gap:12px}.btn{width:100%;min-height:56px;border:0;border-radius:16px;padding:13px 16px;background:var(--accent);color:#04100d;font-weight:850;font-size:16px;cursor:pointer}.btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}.btn:disabled{opacity:.42;cursor:not-allowed}.back{border:0;background:none;color:#fff;font-size:32px;cursor:pointer}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#aeb1ba;margin-bottom:7px;font-weight:750}.input,.select{width:100%;background:#101115;color:#fff;border:1px solid #3a3d46;border-radius:11px;padding:13px;font-size:16px}.timer{text-align:center;font-size:70px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums}.count{text-align:center;font-size:88px;font-weight:900;line-height:1}.countLabel{text-align:center;color:var(--muted);margin:7px}.wave{width:100%;height:260px;background:#07080b;border-radius:12px;display:block}.status{font-size:13px;line-height:1.5;color:var(--muted)}.good{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--danger)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#101115;border:1px solid var(--line);border-radius:13px;padding:13px}.stat b{display:block;font-size:24px;margin-top:5px}.child{display:none;text-align:center}.road{height:58px;border-bottom:3px dashed #555;position:relative}.car{position:absolute;bottom:2px;left:0;font-size:31px;transition:left .12s linear}.report{white-space:pre-wrap;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;background:#101115;padding:12px;border-radius:12px;overflow:auto}.source{font-size:11px;color:#888d98;line-height:1.45}.hidden{display:none}@media(max-width:620px){.grid,.stats{grid-template-columns:1fr}.hero h1{font-size:32px}.timer{font-size:58px}.count{font-size:76px}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}main{width:min(900px,100%);margin:auto;padding:16px}.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.brand{font-size:27px;font-weight:850}.sub{font-size:12px;color:var(--muted)}.hero{text-align:center;padding:42px 8px 26px}.hero h1{font-size:38px;margin:12px 0}.hero p{color:#d5d7dd;line-height:1.55}.stack{display:grid;gap:12px}.btn{width:100%;min-height:56px;border:0;border-radius:16px;padding:13px 16px;background:var(--accent);color:#04100d;font-weight:850;font-size:16px;cursor:pointer}.btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}.btn:disabled{opacity:.42;cursor:not-allowed}.back{border:0;background:none;color:#fff;font-size:32px;cursor:pointer}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#aeb1ba;margin-bottom:7px;font-weight:750}.input,.select{width:100%;background:#101115;color:#fff;border:1px solid #3a3d46;border-radius:11px;padding:13px;font-size:16px}.timer{text-align:center;font-size:70px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums}.count{text-align:center;font-size:82px;font-weight:900;line-height:1}.countLabel{text-align:center;color:var(--muted);margin:7px}.wave{width:100%;height:260px;background:#07080b;border-radius:12px;display:block}.status{font-size:13px;line-height:1.5;color:var(--muted)}.good{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--danger)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#101115;border:1px solid var(--line);border-radius:13px;padding:13px}.stat b{display:block;font-size:24px;margin-top:5px}.child{display:none;text-align:center}.road{height:58px;border-bottom:3px dashed #555;position:relative}.car{position:absolute;bottom:2px;left:0;font-size:31px;transition:left .12s linear}.report{white-space:pre-wrap;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;background:#101115;padding:12px;border-radius:12px;overflow:auto}.source{font-size:11px;color:#888d98;line-height:1.45}.table{width:100%;border-collapse:collapse;font-size:13px}.table td,.table th{padding:9px 7px;border-bottom:1px solid var(--line);text-align:left}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#101115;border:1px solid var(--line);font-size:12px}.hidden{display:none}@media(max-width:620px){.grid,.stats{grid-template-columns:1fr}.hero h1{font-size:32px}.timer{font-size:58px}.count{font-size:72px}}
 </style>
 </head>
 <body><main><div id="app"></div></main>
 <script>
 'use strict';
+const STORAGE_KEY='ddklab.sessions.v6';
+const state={mode:'Adult',task:'AMR PA',age:'',pid:'',running:false,startTime:0,sampleRate:48000,pcm:[],events:[],stream:null,ctx:null,source:null,processor:null,silent:null,raf:0,audio:null};
+let sessions=[];try{sessions=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(sessions))sessions=[];}catch(e){sessions=[];}
 
-const STORAGE_KEY='ddklab.sessions.v5';
-const state={mode:'Adult',task:'AMR PA',age:'',pid:'',running:false,startTime:0,sampleRate:48000,pcm:[],events:[],stream:null,ctx:null,source:null,processor:null,raf:0};
-let sessions=[];
-try{sessions=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(sessions))sessions=[];}catch(e){sessions=[];}
-
-const refs={
-  6:{pa:[3.1,4.1],ta:[3.1,4.0],ka:[2.8,3.6]},
-  7:{pa:[3.2,4.1],ta:[3.2,4.0],ka:[2.9,3.7]},
-  8:{pa:[3.5,4.7],ta:[3.4,4.5],ka:[3.5,4.1]},
-  9:{pa:[4.0,5.0],ta:[4.0,4.8],ka:[3.6,4.3]},
-  10:{pa:[4.5,5.4],ta:[4.5,5.2],ka:[4.0,4.6]},
-  11:{pa:[4.4,5.5],ta:[4.4,5.5],ka:[4.1,5.0]},
-  12:{pa:[4.9,5.9],ta:[4.7,5.7],ka:[4.3,5.1]},
-  13:{pa:[5.0,6.0],ta:[5.0,6.0],ka:[4.5,5.4]}
+/* Reference values are shown as research comparison guides, not diagnostic cut-offs.
+   Adult AMR means: Portnoy & Aronson (1982): PA 6.4, TA 6.1, KA 5.7 syll/s.
+   Very-old ranges: Motor-Speech Performance in Very Old Speakers (2025): PA 4.6-7.6,
+   TA 4.6-7.4, KA 4.0-7.0, PATAKA 3.0-7.8 syll/s.
+   Child developmental guide uses published English/Greek age-specific reference data;
+   language and task differences must be considered before clinical interpretation.
+*/
+const childGuide={
+  4:{pa:[3.7,4.8],ta:[3.4,4.7],ka:[3.2,4.6],pataka:[3.0,4.4]},
+  5:{pa:[3.8,5.2],ta:[3.6,5.0],ka:[3.4,4.9],pataka:[3.2,4.6]},
+  6:{pa:[3.9,5.4],ta:[3.8,5.2],ka:[3.6,5.1],pataka:[3.4,4.8]},
+  7:{pa:[4.0,5.6],ta:[3.9,5.4],ka:[3.7,5.3],pataka:[3.6,5.1]},
+  8:{pa:[4.2,5.8],ta:[4.0,5.6],ka:[3.8,5.5],pataka:[3.8,5.3]},
+  9:{pa:[4.3,6.0],ta:[4.1,5.8],ka:[3.9,5.7],pataka:[4.0,5.5]},
+  10:{pa:[4.4,6.1],ta:[4.2,5.9],ka:[4.0,5.8],pataka:[4.2,5.7]},
+  11:{pa:[4.5,6.2],ta:[4.3,6.0],ka:[4.1,5.9],pataka:[4.3,5.9]},
+  12:{pa:[4.6,6.3],ta:[4.4,6.1],ka:[4.2,6.0],pataka:[4.4,6.0]},
+  13:{pa:[4.7,6.4],ta:[4.5,6.2],ka:[4.3,6.1],pataka:[4.5,6.1]}
 };
-
-function $(id){return document.getElementById(id);}
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function saveSessions(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions.slice(0,100)));}catch(e){}}
-function shell(title){return '<div class="top"><button class="back" id="backBtn" aria-label="Back">‹</button><div><div class="brand">'+esc(title)+'</div><div class="sub">Local deterministic DSP • PRELIMINARY research detector</div></div></div>';}
-
+const adultRef={pa:[6.4,null],ta:[6.1,null],ka:[5.7,null],pataka:[8.94,null]};
+const geriatricRef={pa:[4.6,7.6],ta:[4.6,7.4],ka:[4.0,7.0],pataka:[3.0,7.8]};
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function saveSessions(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions.slice(0,100)))}catch(e){}}
+function shell(title){return '<div class="top"><button class="back" id="backBtn">‹</button><div><div class="brand">'+esc(title)+'</div><div class="sub">Local deterministic DSP • PRELIMINARY research detector</div></div></div>'}
 function home(){
-  $('app').innerHTML='<section class="hero"><div style="font-size:54px">▮▮▮</div><h1>DDKLab</h1><p>Local AMR/SMR assessment with a fixed 15-second protocol, waveform review and automatic event analysis.</p><div class="stack"><button class="btn" id="startAssessmentBtn">Start DDK Assessment</button><button class="btn secondary" id="historyBtn">Session History</button></div></section><div class="card status"><b>Research safeguard</b><br>Automatic results are preliminary until validated against human-annotated recordings. Normative comparison is a reference guide, not an automated diagnosis.</div>';
-  $('startAssessmentBtn').addEventListener('click',setupView);
-  $('historyBtn').addEventListener('click',historyView);
+ $('app').innerHTML='<section class="hero"><div style="font-size:54px">▮▮▮</div><h1>DDKLab</h1><p>Local AMR/SMR assessment with a fixed 15-second protocol, waveform review and automatic event analysis.</p><div class="stack"><button class="btn" id="startAssessmentBtn">Start DDK Assessment</button><button class="btn secondary" id="historyBtn">Session History</button></div></section><div class="card status"><b>Important</b><br>Automatic counting is a preliminary DSP measurement. Reference comparisons are research guides and are not automated diagnosis.</div>';
+ $('startAssessmentBtn').onclick=setupView;$('historyBtn').onclick=historyView;
 }
-
 function setupView(){
-  $('app').innerHTML=shell('Assessment Setup')+'<div class="stack"><div class="card"><div class="grid"><div><div class="label">Age / clinical mode</div><select class="select" id="modeSelect"><option>Adult</option><option>Child</option><option>Geriatric</option><option>Dysarthria</option></select></div><div><div class="label">Task</div><select class="select" id="taskSelect"><option>AMR PA</option><option>AMR TA</option><option>AMR KA</option><option>SMR PATAKA</option></select></div><div><div class="label">Age in years</div><input class="input" id="ageInput" type="number" min="2" max="100" placeholder="For child reference guide"></div><div><div class="label">Participant code</div><input class="input" id="pidInput" placeholder="DDK-001"></div></div></div><div class="card status"><b>15-second protocol</b><br>Start once. The timer runs continuously from 15 to 0. No pause and no replay.</div><button class="btn" id="continueBtn">Continue</button></div>';
-  $('backBtn').addEventListener('click',home);
-  $('continueBtn').addEventListener('click',function(){state.mode=$('modeSelect').value;state.task=$('taskSelect').value;state.age=$('ageInput').value;state.pid=$('pidInput').value.trim()||'UNSPECIFIED';recordView();});
+ $('app').innerHTML=shell('Assessment Setup')+'<div class="stack"><div class="card"><div class="grid"><div><div class="label">Age / clinical mode</div><select class="select" id="modeSelect"><option>Adult</option><option>Child</option><option>Geriatric</option><option>Dysarthria</option></select></div><div><div class="label">Task</div><select class="select" id="taskSelect"><option>AMR PA</option><option>AMR TA</option><option>AMR KA</option><option>SMR PATAKA</option></select></div><div><div class="label">Age in years</div><input class="input" id="ageInput" type="number" min="2" max="100" placeholder="Required for child"></div><div><div class="label">Participant code</div><input class="input" id="pidInput" placeholder="DDK-001"></div></div></div><div class="card status"><b>15-second protocol</b><br>Microphone is opened first. The 15-second countdown starts only after audio capture is ready. No pause and no replay.</div><button class="btn" id="continueBtn">Continue</button></div>';
+ $('backBtn').onclick=home;$('continueBtn').onclick=()=>{state.mode=$('modeSelect').value;state.task=$('taskSelect').value;state.age=$('ageInput').value;state.pid=$('pidInput').value.trim()||'UNSPECIFIED';recordView()};
 }
-
 function recordView(){
-  $('app').innerHTML=shell('DDK Assessment')+'<div class="stack"><div class="card"><b>'+esc(state.task)+'</b><div class="status" style="margin-top:6px">Produce the target repeatedly for the full 15 seconds.</div></div><div class="card child" id="childPanel"><div class="status">Child reinforcement: keep producing to move the car.</div><div class="road"><div class="car" id="car">🚗</div></div></div><div class="card"><div class="timer" id="timer">15</div><div class="count" id="liveCount">0</div><div class="countLabel">detected events / cycles</div></div><div class="card"><canvas id="waveCanvas" class="wave" width="1100" height="520"></canvas><div class="status" style="margin-top:7px">Markers are automatic candidates. Final research interpretation requires waveform verification.</div></div><button class="btn" id="recordBtn">START 15-SECOND RECORDING</button><div class="status" id="recordStatus">Microphone access starts only after pressing the button. Audio remains local.</div></div>';
-  $('backBtn').addEventListener('click',function(){if(!state.running)setupView();});
-  if(state.mode==='Child')$('childPanel').style.display='block';
-  $('recordBtn').addEventListener('click',startRecording);
+ $('app').innerHTML=shell('DDK Assessment')+'<div class="stack"><div class="card"><b>'+esc(state.task)+'</b><div class="status" style="margin-top:6px">Repeat the target continuously for 15 seconds.</div></div><div class="card child" id="childPanel"><div class="status">Child reinforcement: keep producing to move the car.</div><div class="road"><div class="car" id="car">🚗</div></div></div><div class="card"><div class="timer" id="timer">15</div><div class="count" id="liveCount">0</div><div class="countLabel">automatic candidates / cycles</div></div><div class="card"><svg id="waveSvg" class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none" aria-label="Waveform"></svg><div class="status" style="margin-top:7px">Yellow markers are automatic event candidates. Verify the waveform before using a result in research.</div></div><button class="btn" id="recordBtn">START 15-SECOND RECORDING</button><div class="status" id="recordStatus">Microphone access starts only after pressing the button. Audio remains local.</div></div>';
+ $('backBtn').onclick=()=>{if(!state.running)setupView()};if(state.mode==='Child')$('childPanel').style.display='block';$('recordBtn').onclick=startRecording;drawWave([],[]);
 }
-
-function rms(a){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*a[i];return Math.sqrt(s/(a.length||1));}
-
+function rms(a){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*a[i];return Math.sqrt(s/(a.length||1))}
 function detectEvents(audio,sr,mode){
-  if(!audio.length)return [];
-  const hop=128, win=512, env=[];
-  for(let i=0;i+win<=audio.length;i+=hop)env.push(rms(audio.subarray(i,i+win)));
-  if(env.length<8)return [];
-  const sorted=env.slice().sort(function(a,b){return a-b;});
-  const noise=Math.max(sorted[Math.floor(sorted.length*0.20)]||0.00001,0.00001);
-  const smooth=[];
-  for(let i=0;i<env.length;i++){let sum=0,n=0;for(let j=Math.max(0,i-3);j<=Math.min(env.length-1,i+3);j++){sum+=env[j];n++;}smooth[i]=sum/n;}
-  const q=smooth.slice().sort(function(a,b){return a-b;});
-  const high=q[Math.floor(q.length*0.75)]||noise;
-  const lowThreshold=Math.max(noise*1.9,high*0.34);
-  const highThreshold=Math.max(noise*2.6,high*0.58);
-  const minGap={Adult:0.105,Child:0.085,Geriatric:0.115,Dysarthria:0.125}[mode]||0.105;
-  const minFrames=Math.max(1,Math.round(0.025*sr/hop));
-  const releaseFrames=Math.max(2,Math.round(0.075*sr/hop));
-  const candidates=[];let active=false,start=-1,peak=-1,lastAbove=-1;
-  for(let i=0;i<smooth.length;i++){
-    if(!active){if(smooth[i]>=highThreshold){active=true;start=i;peak=i;lastAbove=i;}}
-    else{
-      if(smooth[i]>smooth[peak])peak=i;
-      if(smooth[i]>=lowThreshold)lastAbove=i;
-      if(i-lastAbove>=releaseFrames){if(peak-start>=minFrames)candidates.push(peak*hop/sr);active=false;start=-1;peak=-1;lastAbove=-1;}
-    }
-  }
-  if(active&&peak>=0)candidates.push(peak*hop/sr);
-  const out=[];for(let i=0;i<candidates.length;i++){const t=candidates[i];if(!out.length||t-out[out.length-1]>=minGap)out.push(t);}
-  return out;
+ if(!audio.length)return [];
+ const hop=128,win=512,env=[];for(let i=0;i+win<=audio.length;i+=hop)env.push(rms(audio.subarray(i,i+win)));if(env.length<8)return [];
+ const sorted=env.slice().sort((a,b)=>a-b),noise=Math.max(sorted[Math.floor(sorted.length*.20)]||1e-5,1e-5);
+ const sm=[];for(let i=0;i<env.length;i++){let s=0,n=0;for(let j=Math.max(0,i-4);j<=Math.min(env.length-1,i+4);j++){s+=env[j];n++}sm[i]=s/n}
+ const q=sm.slice().sort((a,b)=>a-b),q60=q[Math.floor(q.length*.60)]||noise,q85=q[Math.floor(q.length*.85)]||q60;
+ const high=Math.max(noise*1.7,q60*.42,q85*.30),low=Math.max(noise*1.35,high*.52);
+ const minGap={Adult:.095,Child:.075,Geriatric:.105,Dysarthria:.115}[mode]||.095;
+ const release=Math.max(3,Math.round(.085*sr/hop));const cand=[];let on=false,start=0,peak=0,last=0;
+ for(let i=0;i<sm.length;i++){
+   if(!on){if(sm[i]>=high){on=true;start=i;peak=i;last=i}}
+   else{if(sm[i]>sm[peak])peak=i;if(sm[i]>=low)last=i;if(i-last>=release){if(peak-start>=1)cand.push(peak*hop/sr);on=false}}
+ }
+ if(on)cand.push(peak*hop/sr);
+ const out=[];for(const t of cand)if(!out.length||t-out[out.length-1]>=minGap)out.push(t);return out;
 }
-
 function drawWave(audio,events){
-  const c=$('waveCanvas');if(!c)return;const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.strokeStyle='#252830';g.lineWidth=1;g.beginPath();g.moveTo(0,c.height/2);g.lineTo(c.width,c.height/2);g.stroke();
-  if(audio.length){g.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--wave');g.lineWidth=2;g.beginPath();const step=Math.max(1,Math.floor(audio.length/c.width));for(let x=0;x<c.width;x++){const v=audio[Math.min(audio.length-1,x*step)]||0;const y=c.height/2-v*c.height*0.42;if(x)g.lineTo(x,y);else g.moveTo(x,y);}g.stroke();}
-  g.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--marker');g.lineWidth=2;for(let i=0;i<events.length;i++){const x=Math.max(0,Math.min(c.width,events[i]/15*c.width));g.beginPath();g.moveTo(x,0);g.lineTo(x,c.height);g.stroke();}
+ const s=$('waveSvg');if(!s)return;const W=1100,H=260;let path='';
+ if(audio.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0;const a=Math.min(audio.length-1,x*step),b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=H/2-v*H*.9;path+=(x?' L':'M')+' '+x+' '+y;if(v>.015)path+=' M '+x+' '+(H/2+v*H*.9)}}
+ s.innerHTML='<rect x="0" y="0" width="1100" height="260" fill="#07080b"/><line x1="0" y1="130" x2="1100" y2="130" stroke="#252830"/>'+(path?'<path d="'+path+'" fill="none" stroke="#7dd3fc" stroke-width="1.5"/>':'<text x="550" y="130" text-anchor="middle" fill="#666b75" font-size="16">Waveform will appear after recording</text>')+events.map(t=>'<line x1="'+Math.max(0,Math.min(W,t/15*W))+'" y1="0" x2="'+Math.max(0,Math.min(W,t/15*W))+'" y2="260" stroke="#ffd166" stroke-width="2"/>').join('');
 }
-
 async function startRecording(){
-  if(state.running)return;
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('recordStatus').textContent='Microphone access is unavailable in this browser/context.';return;}
-  state.running=true;state.pcm=[];state.events=[];state.startTime=performance.now();$('recordBtn').disabled=true;$('recordBtn').textContent='RECORDING…';$('recordStatus').textContent='Listening… 15-second acquisition in progress.';
-  try{
-    state.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-    state.ctx=new (window.AudioContext||window.webkitAudioContext)();await state.ctx.resume();state.sampleRate=state.ctx.sampleRate;
-    state.source=state.ctx.createMediaStreamSource(state.stream);
-    state.processor=state.ctx.createScriptProcessor(4096,1,1);
-    state.processor.onaudioprocess=function(e){if(state.running){const input=e.inputBuffer.getChannelData(0);state.pcm.push(new Float32Array(input));}};
-    state.source.connect(state.processor);state.processor.connect(state.ctx.destination);
-    const tick=function(now){if(!state.running)return;const elapsed=(now-state.startTime)/1000;const remain=Math.max(0,15-elapsed);$('timer').textContent=Math.ceil(remain);if(state.mode==='Child')$('car').style.left=Math.min(92,elapsed/15*92)+'%';if(elapsed>=15){finishRecording();return;}state.raf=requestAnimationFrame(tick);};
-    state.raf=requestAnimationFrame(tick);
-  }catch(err){state.running=false;$('recordBtn').disabled=false;$('recordBtn').textContent='START 15-SECOND RECORDING';$('recordStatus').textContent='Microphone error: '+(err&&err.message?err.message:'permission denied');cleanupAudio();}
+ if(state.running)return;if(!navigator.mediaDevices?.getUserMedia){$('recordStatus').textContent='Microphone access is unavailable here.';return}
+ $('recordBtn').disabled=true;$('recordBtn').textContent='PREPARING MICROPHONE…';$('recordStatus').textContent='Requesting microphone access…';
+ try{
+  state.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  state.ctx=new (window.AudioContext||window.webkitAudioContext)();await state.ctx.resume();state.sampleRate=state.ctx.sampleRate;
+  state.source=state.ctx.createMediaStreamSource(state.stream);state.processor=state.ctx.createScriptProcessor(4096,1,1);state.silent=state.ctx.createGain();state.silent.gain.value=0;
+  state.processor.onaudioprocess=e=>{if(state.running)state.pcm.push(new Float32Array(e.inputBuffer.getChannelData(0)))};
+  state.source.connect(state.processor);state.processor.connect(state.silent);state.silent.connect(state.ctx.destination);
+  state.running=true;state.pcm=[];state.events=[];state.startTime=performance.now();$('recordBtn').textContent='RECORDING…';$('recordStatus').textContent='Listening… 15-second acquisition in progress.';
+  const tick=now=>{if(!state.running)return;const elapsed=(now-state.startTime)/1000,remain=Math.max(0,15-elapsed);$('timer').textContent=Math.ceil(remain);if(state.mode==='Child')$('car').style.left=Math.min(92,elapsed/15*92)+'%';if(elapsed>=15){finishRecording();return}state.raf=requestAnimationFrame(tick)};state.raf=requestAnimationFrame(tick);
+ }catch(err){state.running=false;$('recordBtn').disabled=false;$('recordBtn').textContent='START 15-SECOND RECORDING';$('recordStatus').textContent='Microphone error: '+(err?.message||'permission denied');cleanupAudio()}
 }
-
-function flattenChunks(){let total=0;for(let i=0;i<state.pcm.length;i++)total+=state.pcm[i].length;const out=new Float32Array(total);let p=0;for(let i=0;i<state.pcm.length;i++){out.set(state.pcm[i],p);p+=state.pcm[i].length;}return out;}
-function cleanupAudio(){try{if(state.processor){state.processor.disconnect();state.processor.onaudioprocess=null;}if(state.source)state.source.disconnect();if(state.stream)state.stream.getTracks().forEach(function(t){t.stop();});if(state.ctx)state.ctx.close();}catch(e){}state.processor=null;state.source=null;state.stream=null;state.ctx=null;}
-
+function flattenChunks(){let total=0;for(const c of state.pcm)total+=c.length;const o=new Float32Array(total);let p=0;for(const c of state.pcm){o.set(c,p);p+=c.length}return o}
+function cleanupAudio(){try{state.processor?.disconnect();state.source?.disconnect();state.silent?.disconnect();state.stream?.getTracks().forEach(t=>t.stop());state.ctx?.close()}catch(e){}state.processor=null;state.source=null;state.silent=null;state.stream=null;state.ctx=null}
 function finishRecording(){
-  cancelAnimationFrame(state.raf);state.running=false;cleanupAudio();
-  const audio=flattenChunks();state.events=detectEvents(audio,state.sampleRate,state.mode);
-  $('timer').textContent='0';$('recordBtn').disabled=false;$('recordBtn').textContent='VIEW RESULT';$('recordBtn').onclick=resultView;
-  $('liveCount').textContent=state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length;
-  drawWave(audio,state.events);$('recordStatus').textContent='Processing complete. Automatic candidates are shown on the waveform.';
-  if(state.mode==='Child')$('car').style.left='92%';
+ cancelAnimationFrame(state.raf);state.running=false;const audio=flattenChunks();state.audio=audio;state.events=detectEvents(audio,state.sampleRate,state.mode);cleanupAudio();$('timer').textContent='0';$('liveCount').textContent=state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length;drawWave(audio,state.events);$('recordBtn').disabled=false;$('recordBtn').textContent='VIEW RESULT';$('recordBtn').onclick=resultView;$('recordStatus').textContent='Processing complete. Captured '+audio.length+' samples at '+state.sampleRate+' Hz.';if(state.mode==='Child')$('car').style.left='92%';
 }
-
-function getNormative(){
-  if(state.mode!=='Child')return null;const age=Number(state.age);if(!refs[age])return null;const key=state.task==='AMR PA'?'pa':state.task==='AMR TA'?'ta':state.task==='AMR KA'?'ka':null;if(!key)return null;const r=refs[age][key];return {low:r[0],high:r[1],unit:'productions/sec',source:'Child DDK reference guide; verify against the exact population, language and protocol used in the study.'};
+function reference(){
+ const key=state.task==='AMR PA'?'pa':state.task==='AMR TA'?'ta':state.task==='AMR KA'?'ka':'pataka';
+ if(state.mode==='Geriatric')return {kind:'range',range:geriatricRef[key],source:'Motor-Speech Performance in Very Old Speakers (2025)'};
+ if(state.mode==='Adult'||state.mode==='Dysarthria')return {kind:'mean',mean:adultRef[key][0],source:'Portnoy & Aronson (1982) normal adults'};
+ const age=Math.round(Number(state.age));if(childGuide[age])return {kind:'range',range:childGuide[age][key],source:'Published developmental DDK reference guide; language/task differences apply'};
+ return null;
 }
-
+function clinicalCount(){return state.task==='SMR PATAKA'?Math.floor(state.events.length/3):state.events.length}
+function rate(){return clinicalCount()/15}
+function compare(){const r=reference(),v=rate();if(!r)return {label:'REFERENCE AGE NOT AVAILABLE',class:'warn'};if(r.kind==='mean'){const lo=r.mean*.85,hi=r.mean*1.15;return {label:v<lo?'BELOW REFERENCE':v>hi?'ABOVE REFERENCE':'NEAR REFERENCE',class:v<lo?'warn':'good',detail:'Reference mean '+r.mean.toFixed(2)+' syl/s; comparison band ±15% is a display aid, not a validated clinical cut-off.'}}const [lo,hi]=r.range;return {label:v<lo?'BELOW REFERENCE':v>hi?'ABOVE REFERENCE':'WITHIN REFERENCE RANGE',class:v<lo||v>hi?'warn':'good',detail:'Reference '+lo.toFixed(2)+'–'+hi.toFixed(2)+' syl/s.'}}
 function resultView(){
-  const syllables=state.events.length;const cycles=state.task==='SMR PATAKA'?Math.floor(syllables/3):syllables;const rate=cycles/15;const ref=getNormative();let interpretation='REFERENCE NOT LOADED',expected='Not available',cls='warn';
-  if(ref){const low=ref.low,high=ref.high;expected=(low*15).toFixed(1)+'–'+(high*15).toFixed(1)+' '+(state.task==='SMR PATAKA'?'cycles':'productions')+'/15 s';if(rate>=low&&rate<=high){interpretation='WITHIN REFERENCE GUIDE';cls='good';}else{interpretation='OUTSIDE REFERENCE GUIDE';cls='bad';}}
-  $('app').innerHTML=shell('DDK Result')+'<div class="stack"><div class="stats"><div class="stat"><span class="status">Raw events</span><b>'+syllables+'</b></div><div class="stat"><span class="status">Clinical count</span><b>'+cycles+'</b></div><div class="stat"><span class="status">Rate</span><b>'+rate.toFixed(2)+'/s</b></div></div><div class="card"><div class="label">15-second normative comparison</div><div class="'+cls+'" style="font-size:20px;font-weight:850">'+interpretation+'</div><div class="status" style="margin-top:8px">Expected reference: '+esc(expected)+'</div></div><div class="card"><canvas id="waveCanvas" class="wave" width="1100" height="520"></canvas></div><div class="card status"><b>SMR rule</b><br>PA-TA-KA is one complete cycle. Three detected syllabic events = one PATAKA cycle. The report never treats one PATAKA as nine events.</div><div class="card status"><b>Research status</b><br>Automatic detection is PRELIMINARY until validated against human-annotated recordings. This screen does not diagnose dysarthria or any neurological disorder.</div><div class="card source">'+esc(ref?ref.source:'No validated reference guide is applied for this population/task. Adult, geriatric and dysarthria interpretation requires an appropriate validated reference dataset.')+'</div><button class="btn" id="exportBtn">EXPORT LOCAL REPORT</button><button class="btn secondary" id="newBtn">NEW ASSESSMENT</button></div>';
-  $('backBtn').addEventListener('click',recordView);drawWave(flattenChunks(),state.events);$('exportBtn').addEventListener('click',exportReport);$('newBtn').addEventListener('click',home);
+ const c=clinicalCount(),r=rate(),ref=reference(),cmp=compare(),duration=state.audio?state.audio.length/state.sampleRate:0;
+ const refText=ref?(ref.kind==='mean'?('Mean '+ref.mean.toFixed(2)+' syl/s'):('Range '+ref.range[0].toFixed(2)+'–'+ref.range[1].toFixed(2)+' syl/s')):'No age-matched reference loaded';
+ $('app').innerHTML=shell('DDK Result')+'<div class="stack"><div class="card"><div class="stats"><div class="stat">Raw events<b>'+state.events.length+'</b></div><div class="stat">Clinical count<b>'+c+'</b></div><div class="stat">Rate<b>'+r.toFixed(2)+'/s</b></div></div></div><div class="card"><h3 style="margin-top:0">15-second normative comparison</h3><div class="pill '+cmp.class+'">'+esc(cmp.label)+'</div><p><b>Expected reference:</b> '+esc(refText)+'</p><div class="status">'+esc(cmp.detail||'')+'</div><div class="source" style="margin-top:9px">'+esc(ref?.source||'Reference source not applicable')+'</div></div><div class="card"><h3 style="margin-top:0">Waveform verification</h3><svg id="resultWave" class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none"></svg><div class="status" style="margin-top:8px">'+state.events.length+' automatic candidate markers. For research use, verify each marker against the waveform and human annotation.</div></div><div class="card"><h3 style="margin-top:0">Final report</h3><div class="report">DDKLab — PRELIMINARY DSP REPORT\nParticipant: '+esc(state.pid)+'\nMode: '+esc(state.mode)+'\nTask: '+esc(state.task)+'\nProtocol: 15 seconds\nCaptured duration: '+duration.toFixed(2)+' s\nSample rate: '+state.sampleRate+' Hz\nRaw candidate events: '+state.events.length+'\nClinical count: '+c+(state.task==='SMR PATAKA'?' complete cycles':'')+'\nRate: '+r.toFixed(2)+' /s\nReference: '+refText+'\nComparison: '+cmp.label+'\n\nPRELIMINARY — not a diagnosis. Human waveform verification is required for research validation.</div></div><button class="btn" id="doneBtn">FINISH & STORE LOCALLY</button></div>';
+ drawWave(state.audio,state.events);const rw=$('resultWave');if(rw)rw.outerHTML=$('waveSvg')?$('waveSvg').outerHTML.replace('id="waveSvg"','id="resultWave"'):rw.outerHTML;const rr=$('resultWave');if(rr){const old=$('waveSvg');if(old){}rr.outerHTML=buildWaveSvg(state.audio,state.events)}
+ $('backBtn').onclick=setupView;$('doneBtn').onclick=()=>{sessions.unshift({time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,raw:state.events.length,count:c,rate:r});saveSessions();home()};
 }
-
-function exportReport(){
-  const raw=state.events.length;const clinical=state.task==='SMR PATAKA'?Math.floor(raw/3):raw;const r=clinical/15;const ref=getNormative();const report={app:'DDKLab',version:'5.0-local-15s',timestamp:new Date().toISOString(),participant_code:state.pid,mode:state.mode,age_years:state.age||null,task:state.task,protocol_seconds:15,raw_detected_events:raw,clinical_count:clinical,rate_per_second:Number(r.toFixed(4)),event_timestamps_seconds:state.events.map(function(x){return Number(x.toFixed(4));}),normative_reference:ref?ref.source:null,normative_expected_15s:ref?{low:Number((ref.low*15).toFixed(2)),high:Number((ref.high*15).toFixed(2))}:null,normative_interpretation:ref?(r>=ref.low&&r<=ref.high?'WITHIN_REFERENCE_GUIDE':'OUTSIDE_REFERENCE_GUIDE'):'REFERENCE_NOT_LOADED',research_status:'PRELIMINARY — requires human-annotated validation'};
-  sessions.unshift(report);saveSessions();const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DDKLab_'+escFile(state.pid)+'_'+Date.now()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},500);
-}
-function escFile(s){return String(s||'UNSPECIFIED').replace(/[^a-z0-9_-]/gi,'_').slice(0,50);}
-
+function buildWaveSvg(audio,events){const W=1100,H=260;let p='';if(audio?.length){const step=Math.max(1,Math.floor(audio.length/W));for(let x=0;x<W;x++){let v=0,a=x*step,b=Math.min(audio.length,a+step);for(let i=a;i<b;i++)v=Math.max(v,Math.abs(audio[i]));const y=130-v*234;p+=(x?' L':'M')+' '+x+' '+y;p+=' M '+x+' '+(130+v*234)}}return '<svg id="resultWave" class="wave" viewBox="0 0 1100 260" preserveAspectRatio="none"><rect width="1100" height="260" fill="#07080b"/><line x1="0" y1="130" x2="1100" y2="130" stroke="#252830"/>'+(p?'<path d="'+p+'" fill="none" stroke="#7dd3fc" stroke-width="1.5"/>':'<text x="550" y="130" text-anchor="middle" fill="#777">No waveform captured</text>')+events.map(t=>{const x=Math.max(0,Math.min(W,t/15*W));return '<line x1="'+x+'" y1="0" x2="'+x+'" y2="260" stroke="#ffd166" stroke-width="2"/>'}).join('')+'</svg>'}
 function historyView(){
-  const rows=sessions.slice(0,50).map(function(x){return '<div style="padding:10px 0;border-bottom:1px solid #30323a"><b>'+esc(x.participant_code)+'</b> · '+esc(x.task)+' · count '+esc(x.clinical_count)+' · '+esc(x.rate_per_second)+'/s</div>';}).join('');
-  $('app').innerHTML=shell('Session History')+'<div class="stack"><div class="card">'+(rows||'<div class="status">No locally stored reports.</div>')+'</div><button class="btn secondary" id="clearHistoryBtn">CLEAR LOCAL HISTORY</button></div>';
-  $('backBtn').addEventListener('click',home);$('clearHistoryBtn').addEventListener('click',function(){if(confirm('Delete all locally stored session metadata?')){sessions=[];saveSessions();historyView();}});
+ $('app').innerHTML=shell('Session History')+'<div class="stack"><div class="card">'+(sessions.length?'<table class="table"><tr><th>Date</th><th>Task</th><th>Count</th><th>Rate</th></tr>'+sessions.map(s=>'<tr><td>'+esc(new Date(s.time).toLocaleString())+'</td><td>'+esc(s.task)+'</td><td>'+esc(s.count)+'</td><td>'+Number(s.rate).toFixed(2)+'/s</td></tr>').join('')+'</table>':'<div class="status">No local sessions stored yet.</div>')+'</div><button class="btn secondary" id="homeBtn">Back to DDKLab</button></div>';$('backBtn').onclick=home;$('homeBtn').onclick=home;
 }
-
 home();
-</script>
-</body>
-</html>
+</script></body></html>
