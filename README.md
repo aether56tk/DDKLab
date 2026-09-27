@@ -2,21 +2,31 @@
 
 **Local-only Diadochokinetic (DDK) analysis application.**
 
-## 📥 Download the Windows App
+## 📥 Download DDKLab
 
-### [⬇️ Download DDKLab for Windows — Direct `.exe`](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Setup-1.0.0.exe)
+### 🪟 Windows
+
+[⬇️ Download DDKLab for Windows — Direct `.exe`](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Setup-1.0.0.exe)
 
 **One click → download → install.**
 
-Or visit the [DDKLab Releases](https://github.com/aether56tk/DDKLab/releases) page to see the current version and release notes.
+### 📱 Android
 
-> **No Node.js, npm, Flutter, or development setup is required to use the installed Windows application.**
+[⬇️ Download DDKLab for Android — APK](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Android-1.1.0.apk)
 
-The Windows installer is automatically published as a GitHub Release from the `main` branch after a successful build.
+If the APK is not attached to the latest release yet, use the [DDKLab Actions](https://github.com/aether56tk/DDKLab/actions) page and download the `DDKLab-Android` artifact from the successful Android build.
+
+> Android may ask you to allow installation from this source. Only install APKs obtained from this official DDKLab repository/release.
+
+### Releases
+
+[View all DDKLab Releases](https://github.com/aether56tk/DDKLab/releases)
+
+> **Windows:** No Node.js, npm, Flutter, or development setup is required to use the installed application.
 
 ## Current build
 
-The repository contains an Electron application with local microphone recording, waveform rendering, deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and an OS-backed application PIN gate.
+The repository contains an Electron Windows application and an Android build with local microphone recording, waveform rendering, deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and application security controls.
 
 ### Run from source
 
@@ -27,7 +37,7 @@ npm install
 npm start
 ```
 
-The app opens as a desktop application. It does not require Firebase, Supabase, or a cloud backend.
+The desktop app does not require Firebase, Supabase, or a cloud backend.
 
 ## DDK rules
 
@@ -45,7 +55,7 @@ Each complete PA-TA-KA sequence counts as **one SMR cycle**. For example, `PA-TA
 
 ## Architecture
 
-DDKLab is intentionally local-only:
+DDKLab is intentionally local-first:
 
 - No Firebase
 - No Firestore
@@ -53,11 +63,10 @@ DDKLab is intentionally local-only:
 - No cloud database
 - No cloud audio processing
 - No Gemini in the measurement path
-- No browser localStorage/IndexedDB as the application data layer
 - Audio and results remain on the device
-- Electron context isolation and sandboxing are enabled
+- Windows Electron context isolation and sandboxing are enabled
 
-Session metadata and recordings are written under the operating system's application-data directory. The application PIN uses Electron's OS-backed `safeStorage` facility when available.
+Session metadata and recordings are stored locally. The Windows application PIN uses Electron's OS-backed `safeStorage` facility when available.
 
 ## Measurement pipeline
 
@@ -97,7 +106,7 @@ The current detector is a **PRELIMINARY** envelope/temporal detector. It is not 
 
 ## Security
 
-The application includes an application-level PIN and OS-backed secure storage where available. Raw PINs are not stored. No application can honestly guarantee that it is impossible to hack; the security layer is designed to reduce unauthorized local access.
+The application includes application-level security controls and OS-backed secure storage where available. No application can honestly guarantee that it is impossible to hack; the security layer is designed to reduce unauthorized local access.
 
 ## Research validation
 
