@@ -30,17 +30,32 @@ jobs:
         working-directory: android
         run: gradle :app:assembleRelease --no-daemon
 
-      - name: Sign APK for distribution
+      - name: Verify APK signature and metadata
         shell: bash
         run: |
-          # The unsigned release APK is intentionally retained for this first public build.
+          set -e
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          UNSIGNED="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          if [ -f "$APK" ]; then
+            echo "Signed APK found: $APK"
+          elif [ -f "$UNSIGNED" ]; then
+            echo "Release APK is unsigned; signing is required before distribution."
+            exit 1
+          else
+            echo "No release APK found."
+            exit 1
+          fi
+
+      - name: Prepare APK artifact
+        shell: bash
+        run: |
+          set -e
           mkdir -p dist
-          cp android/app/build/outputs/apk/release/app-release-unsigned.apk dist/DDKLab-Android-1.1.0-unsigned.apk
+          cp android/app/build/outputs/apk/release/app-release.apk dist/DDKLab-Android-1.1.0.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: DDKLab-Android
-          path: dist/DDKLab-Android-1.1.0-unsigned.apk
+          path: dist/DDKLab-Android-1.1.0.apk
           if-no-files-found: error
-
