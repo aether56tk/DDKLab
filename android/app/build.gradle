@@ -1,5 +1,33 @@
 plugins { id 'com.android.application' }
 
-android { namespace 'com.ddklab.app'; compileSdk 35
-    defaultConfig { applicationId 'com.ddklab.app'; minSdk 23; targetSdk 35; versionCode 2; versionName '1.1.0' }
+android {
+    namespace 'com.ddklab.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.ddklab.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 3
+        versionName '1.1.1'
+    }
+
+    signingConfigs {
+        release {
+            def storeFilePath = System.getenv('DDKLAB_KEYSTORE')
+            if (storeFilePath) {
+                storeFile file(storeFilePath)
+                storePassword System.getenv('DDKLAB_STORE_PASSWORD')
+                keyAlias System.getenv('DDKLAB_KEY_ALIAS')
+                keyPassword System.getenv('DDKLAB_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
 }
