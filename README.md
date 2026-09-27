@@ -2,11 +2,21 @@
 
 **Local-only Diadochokinetic (DDK) analysis application.**
 
+## 📥 Download the Windows App
+
+### [⬇️ Download DDKLab for Windows](https://github.com/aether56tk/DDKLab/actions/workflows/build-windows-app.yml)
+
+Open the **latest successful workflow run**, scroll to **Artifacts**, and download **DDKLab-Windows**. Extract the ZIP and run **DDKLab-Setup-1.0.0.exe**.
+
+> **No Node.js, npm, Flutter, or development setup is required to use the installed Windows application.**
+
+The installer is built automatically from the `main` branch by GitHub Actions.
+
 ## Current build
 
-The repository now contains an Electron application foundation with local microphone recording, waveform rendering, preliminary deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and an OS-backed application PIN gate.
+The repository contains an Electron application with local microphone recording, waveform rendering, deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and an OS-backed application PIN gate.
 
-### Run
+### Run from source
 
 Install Node.js, then from the repository root:
 
