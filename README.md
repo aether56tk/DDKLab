@@ -4,13 +4,15 @@
 
 ## 📥 Download the Windows App
 
-### [⬇️ Download DDKLab for Windows](https://github.com/aether56tk/DDKLab/actions/workflows/build-windows-app.yml)
+### [⬇️ Download DDKLab for Windows — Direct `.exe`](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Setup-1.0.0.exe)
 
-Open the **latest successful workflow run**, scroll to **Artifacts**, and download **DDKLab-Windows**. Extract the ZIP and run **DDKLab-Setup-1.0.0.exe**.
+**One click → download → install.**
+
+Or visit the [DDKLab Releases](https://github.com/aether56tk/DDKLab/releases) page to see the current version and release notes.
 
 > **No Node.js, npm, Flutter, or development setup is required to use the installed Windows application.**
 
-The installer is built automatically from the `main` branch by GitHub Actions.
+The Windows installer is automatically published as a GitHub Release from the `main` branch after a successful build.
 
 ## Current build
 
