@@ -41,3 +41,17 @@ jobs:
           name: DDKLab-Windows
           path: dist/DDKLab-Setup-*.exe
           if-no-files-found: error
+
+      - name: Publish Windows installer to GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v1.0.0"
+          $exe = Get-ChildItem "dist/DDKLab-Setup-*.exe" | Select-Object -First 1
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag $exe.FullName --title "DDKLab v1.0.0" --notes "DDKLab Windows desktop application. Local-only DDK analysis with deterministic DSP, waveform review, AMR/SMR analysis, local storage, and application PIN." --latest
+          } else {
+            gh release upload $tag $exe.FullName --clobber
+          }
