@@ -26,36 +26,50 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Build APK
+      - name: Create CI signing key
+        shell: bash
+        run: |
+          set -e
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/ddklab-release.keystore" \
+            -alias ddklab \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass ddklab-ci-password \
+            -keypass ddklab-ci-password \
+            -dname "CN=DDKLab, OU=DDKLab, O=DDKLab, L=Local, ST=Local, C=IN"
+
+      - name: Build signed APK
         working-directory: android
+        env:
+          DDKLAB_KEYSTORE: ${{ runner.temp }}/ddklab-release.keystore
+          DDKLAB_STORE_PASSWORD: ddklab-ci-password
+          DDKLAB_KEY_ALIAS: ddklab
+          DDKLAB_KEY_PASSWORD: ddklab-ci-password
         run: gradle :app:assembleRelease --no-daemon
 
-      - name: Verify APK signature and metadata
+      - name: Verify APK signature
         shell: bash
         run: |
           set -e
           APK="android/app/build/outputs/apk/release/app-release.apk"
-          UNSIGNED="android/app/build/outputs/apk/release/app-release-unsigned.apk"
-          if [ -f "$APK" ]; then
-            echo "Signed APK found: $APK"
-          elif [ -f "$UNSIGNED" ]; then
-            echo "Release APK is unsigned; signing is required before distribution."
-            exit 1
-          else
-            echo "No release APK found."
+          if [ ! -f "$APK" ]; then
+            echo "Signed release APK was not produced."
             exit 1
           fi
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
 
       - name: Prepare APK artifact
         shell: bash
         run: |
           set -e
           mkdir -p dist
-          cp android/app/build/outputs/apk/release/app-release.apk dist/DDKLab-Android-1.1.0.apk
+          cp android/app/build/outputs/apk/release/app-release.apk dist/DDKLab-Android-1.1.1.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: DDKLab-Android
-          path: dist/DDKLab-Android-1.1.0.apk
+          path: dist/DDKLab-Android-1.1.1.apk
           if-no-files-found: error
