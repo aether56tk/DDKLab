@@ -1,6 +1,6 @@
 {
   "name": "ddklab",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "DDKLab — local-only Diadochokinetic analysis application",
   "main": "electron/main.cjs",
   "private": true,
@@ -14,16 +14,29 @@
     "dist": "electron-builder --win --x64 --publish never"
   },
   "devDependencies": {
-    "electron": "latest",
-    "electron-builder": "latest"
+    "electron": "44.5.1",
+    "electron-builder": "26.17.0"
   },
   "build": {
     "appId": "com.ddklab.app",
     "productName": "DDKLab",
     "asar": true,
-    "files": ["electron/**/*", "src/**/*", "README.md", "VALIDATION_STATUS.md", "package.json"],
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "README.md",
+      "VALIDATION_STATUS.md",
+      "package.json"
+    ],
     "win": {
-      "target": [{"target": "nsis", "arch": ["x64"]}],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "artifactName": "DDKLab-Setup-${version}.exe"
     },
     "nsis": {
