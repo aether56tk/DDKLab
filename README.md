@@ -6,21 +6,23 @@
 
 ### 🪟 Windows
 
-[⬇️ Download DDKLab for Windows — Direct `.exe`](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Setup-1.0.0.exe)
+[⬇️ Download DDKLab for Windows — Direct `.exe`](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Setup-1.1.0.exe)
 
 **One click → download → install.**
 
 ### 📱 Android
 
-[⬇️ Download DDKLab for Android — APK](https://github.com/aether56tk/DDKLab/releases/latest/download/DDKLab-Android-1.1.0.apk)
-
-If the APK is not attached to the latest release yet, use the [DDKLab Actions](https://github.com/aether56tk/DDKLab/actions) page and download the `DDKLab-Android` artifact from the successful Android build.
+**Android:** The CI currently produces a signed APK artifact for testing. Download the `DDKLab-Android-1.2.0` artifact from the [DDKLab Actions](https://github.com/aether56tk/DDKLab/actions) page. A Play Store-ready release requires a persistent release signing key and store configuration.
 
 > Android may ask you to allow installation from this source. Only install APKs obtained from this official DDKLab repository/release.
 
 ### Releases
 
 [View all DDKLab Releases](https://github.com/aether56tk/DDKLab/releases)
+
+### 🌐 Web app
+
+The repository includes a GitHub Pages deployment workflow for the browser version. The Pages URL is normally `https://aether56tk.github.io/DDKLab/`; verify the deployment status in the repository Actions/Pages settings before sharing it publicly.
 
 > **Windows:** No Node.js, npm, Flutter, or development setup is required to use the installed application.
 
