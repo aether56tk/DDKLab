@@ -6,15 +6,13 @@ DDKLab software is implemented and testable. **Clinical/research validation agai
 
 ### Complete software work
 
-- Local deterministic DSP pipeline
+- Browser-based deterministic DSP pipeline
 - AMR/SMR grouping
 - Waveform/event visualization
 - Confidence metadata
-- Local session persistence
-- Windows packaging
-- Android packaging workflow
-- Security controls
-- Automated smoke/syntax checks
+- Browser local session persistence
+- Research validation workflows
+- Automated browser-source checks
 - Research proposal and validation documentation
 
 ### Still required before any validation claim
