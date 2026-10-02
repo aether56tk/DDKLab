@@ -1,2 +1,39 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DDKLab</title><link rel="stylesheet" href="styles.css"></head><body><div id="lock"></div><div id="app"></div><script src="lock.js"></script><script src="app.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DDKLab</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="bootError" class="boot-error" hidden>
+  <div class="boot-error-box">
+    <h2>DDKLab could not start</h2>
+    <p id="bootErrorText">The interface encountered a startup error.</p>
+    <small>Your recordings and local data are not deleted. Close this window and try again.</small>
+  </div>
+</div>
+<div id="lock"></div>
+<div id="app"></div>
+<script>
+(function () {
+  function showBootError(message) {
+    const box = document.getElementById('bootError');
+    const text = document.getElementById('bootErrorText');
+    if (text) text.textContent = String(message || 'Unknown startup error');
+    if (box) box.hidden = false;
+  }
+  window.addEventListener('error', function (event) {
+    showBootError('Renderer error: ' + (event.error?.message || event.message || 'Unknown error'));
+  });
+  window.addEventListener('unhandledrejection', function (event) {
+    showBootError('Startup promise error: ' + (event.reason?.message || String(event.reason || 'Unknown error')));
+  });
+})();
+</script>
+<script src="lock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
