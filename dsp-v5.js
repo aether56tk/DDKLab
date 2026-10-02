@@ -124,18 +124,38 @@ function detectPeaks(primary,secondary,step,cfg){
   });
   return {events,candidates:candidates.length,selected:events.length,expectedGap:expected,noise,range};
 }
+function movingMean(x,n){const o=new Float32Array(x.length);let s=0;for(let i=0;i<x.length;i++){s+=x[i];if(i>=n)s-=x[i-n];o[i]=s/Math.min(i+1,n)}return o}
+function preprocessForDDK(audio,sr){
+  // Praat-inspired preprocessing: remove mean pressure/DC, then form a smooth
+  // intensity representation and suppress stationary background energy without
+  // deleting transient speech bursts. This is noise attenuation, not denoising AI.
+  const x=new Float32Array(audio.length);const n0=Math.min(audio.length,Math.round(sr*.25));
+  let dc=0;for(let i=0;i<n0;i++)dc+=audio[i];dc/=Math.max(1,n0);
+  let prev=0,noiseEnergy=[];const hop=Math.max(64,Math.round(sr*.01));
+  for(let i=0;i<audio.length;i+=hop){let s=0,end=Math.min(audio.length,i+hop);for(let j=i;j<end;j++){const v=audio[j]-dc;s+=v*v}noiseEnergy.push(Math.sqrt(s/Math.max(1,end-i)))}
+  const sorted=[...noiseEnergy].sort((a,b)=>a-b),noise=q(sorted,.15),gate=noise*1.75;
+  let hpState=0,lastIn=0;
+  for(let i=0;i<audio.length;i++){
+    const v=audio[i]-dc;
+    // lightweight first-order high-pass (~70 Hz) to remove rumble/DC while retaining DDK bursts
+    hpState=.995*(hpState+v-lastIn);lastIn=v;
+    x[i]=Math.abs(hpState)<gate*.55?hpState*.18:hpState;
+  }
+  let mx=0;for(const v of x)mx=Math.max(mx,Math.abs(v));
+  if(mx>0.98){const g=.92/mx;for(let i=0;i<x.length;i++)x[i]*=g}
+  return {audio:x,noiseFloor:noise,gate,attenuation:noise>0?1-Math.min(1,gate/(noise+1e-9)):.0};
+}
 function detect(audio,sr,mode,isSMR){
   if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v23',reason:'empty'}};
   const cfg=CFG[mode]||CFG.Adult,duration=audio.length/sr;
-  const n0=Math.min(audio.length,Math.round(sr*.20));let dc=0;for(let i=0;i<n0;i++)dc+=audio[i];dc/=Math.max(1,n0);
-  const x=new Float32Array(audio.length);let mx=0;for(let i=0;i<audio.length;i++){x[i]=audio[i]-dc;mx=Math.max(mx,Math.abs(x[i]));}
-  if(mx<1e-5)return {events:[],duration,debug:{version:'DSP-v23',reason:'near_silence'}};
+  const prep=preprocessForDDK(audio,sr),x=prep.audio;let mx=0;for(const v of x)mx=Math.max(mx,Math.abs(v));
+  if(mx<1e-5)return {events:[],duration,debug:{version:'DSP-v24',reason:'near_silence',noiseFloor:prep.noiseFloor}};
   const e=absEnergyEnvelope(x,sr,cfg.lpHz),r=rmsEnvelope(x,sr),n=Math.min(e.e.length,r.e.length);
   const out=detectPeaks(e.e.slice(0,n),r.e.slice(0,n),e.step,cfg),events=out.events.map(v=>v.i*e.step);
   const ints=[];for(let i=1;i<events.length;i++)ints.push(events[i]-events[i-1]);
   const mi=mean(ints),cv=mi?sd(ints)/mi:0;
-  return {events,duration,debug:{version:'DSP-v23',method:'dynamic absolute-energy envelope + RMS consensus + valley/prominence support + adaptive repetition-period estimation + weak-event rescue + soft rhythm gate + refractory suppression + tail rejection',sampleRate:sr,mode,isSMR:!!isSMR,candidates:out.candidates,selected:out.selected,meanInterval:mi,intervalCV:cv,expectedGap:out.expectedGap,smoothingMs:cfg.smoothMs,lowpassHz:cfg.lpHz,minGapMs:cfg.minGap*1000,eventConfidence:out.events.map(c=>c.confidence),rescuedEvents:out.events.filter(c=>c.rescued).length,note:'PRELIMINARY automatic measurement; verify against human waveform annotation.'}};
+  return {events,duration,debug:{version:'DSP-v24',method:'dynamic absolute-energy envelope + RMS consensus + valley/prominence support + adaptive repetition-period estimation + weak-event rescue + soft rhythm gate + refractory suppression + tail rejection',sampleRate:sr,mode,isSMR:!!isSMR,candidates:out.candidates,selected:out.selected,meanInterval:mi,intervalCV:cv,expectedGap:out.expectedGap,smoothingMs:cfg.smoothMs,lowpassHz:cfg.lpHz,minGapMs:cfg.minGap*1000,eventConfidence:out.events.map(c=>c.confidence),rescuedEvents:out.events.filter(c=>c.rescued).length,noiseFloor:prep.noiseFloor,noiseGate:prep.gate,preprocessing:'mean-pressure subtraction + adaptive stationary-noise attenuation + 70-Hz high-pass',referenceModel:'Praat-inspired intensity contour / local prominence / peak interpolation principles; not a Praat implementation',note:'PRELIMINARY automatic measurement; verify against human waveform annotation.'}};
 }
 window.detectDDK=detect;
-window.DDK_DSP_VERSION='DSP-v23';
+window.DDK_DSP_VERSION='DSP-v24';
 })();
