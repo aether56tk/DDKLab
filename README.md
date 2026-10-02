@@ -26,6 +26,14 @@ The repository includes a GitHub Pages deployment workflow for the browser versi
 
 > **Windows:** No Node.js, npm, Flutter, or development setup is required to use the installed application.
 
+## 🧪 Tester feedback
+
+We are currently collecting real-user feedback from BASLP/SLP students, clinicians, faculty, and researchers.
+
+**Feedback form:** https://github.com/aether56tk/DDKLab/issues/new?template=feedback.md
+
+Please report usability problems, recording issues, unexpected DDK results, waveform/marker issues, and requested features. Do not post identifiable patient information or real participant recordings.
+
 ## Current build
 
 The repository contains an Electron Windows application and an Android build with local microphone recording, waveform rendering, deterministic envelope-based event detection, AMR/SMR result logic, local session persistence, local export, child reinforcement, and application security controls.
