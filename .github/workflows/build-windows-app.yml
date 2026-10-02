@@ -2,7 +2,7 @@ name: Build DDKLab Windows App
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'release/v*']
     tags: ['v*']
   workflow_dispatch:
 
@@ -44,16 +44,19 @@ jobs:
           if-no-files-found: error
 
       - name: Publish Windows installer to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = "${{ github.ref_name }}"
+          if ("${{ github.ref }}" -like "refs/heads/release/v*") {
+            $tag = $tag.Substring(8)
+          }
           $exe = Get-ChildItem "dist/DDKLab-Setup-*.exe" | Select-Object -First 1
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag $exe.FullName --title "DDKLab $tag" --notes "DDKLab Windows desktop application. Local-only DDK analysis with deterministic DSP, waveform review, AMR/SMR analysis, local storage, and application PIN." --latest
+            gh release create $tag $exe.FullName --target "${{ github.sha }}" --title "DDKLab $tag" --notes "DDKLab Windows desktop application. Local-only DDK analysis with deterministic DSP, waveform review, AMR/SMR analysis, local storage, and application PIN." --latest
           } else {
             gh release upload $tag $exe.FullName --clobber
           }
