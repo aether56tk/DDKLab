@@ -60,7 +60,7 @@ function annotation(){
     var used={},tp=0,err=0;
     human.forEach(function(h){var best=-1,bd=Infinity;auto.forEach(function(a,i){if(used[i])return;var d=Math.abs(a-h);if(d<=tol&&d<bd){bd=d;best=i}});if(best>=0){used[best]=1;tp++;err+=bd}});
     var fp=auto.length-tp,fn=human.length-tp,precision=tp/(tp+fp||1),recall=tp/(tp+fn||1),f1=2*precision*recall/(precision+recall||1),mae=tp?err/tp:0;
-    sessions.unshift({type:'validation',time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,automatic:auto.length,human:human.length,tp:tp,fp:fp,fn:fn,precision:precision,recall:recall,f1:f1,maeMs:mae*1000,toleranceMs:tol*1000});save();
+    sessions.unshift({type:'validation',time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,automatic:auto.length,human:human.length,tp:tp,fp:fp,fn:fn,precision:precision,recall:recall,f1:f1,maeMs:mae*1000,toleranceMs:tol*1000,automaticMarkers:auto.slice(),humanMarkers:human.slice()});save();
     $('app').innerHTML=shell('Validation Report')+
       '<div class="stack"><div class="card"><div class="stats"><div class="stat">Precision<b>'+((precision*100).toFixed(1))+'%</b></div><div class="stat">Recall<b>'+((recall*100).toFixed(1))+'%</b></div><div class="stat">F1<b>'+((f1*100).toFixed(1))+'%</b></div></div></div>'+
       '<div class="card"><h3>Event agreement</h3><p>Automatic: <b>'+auto.length+'</b> · Human: <b>'+human.length+'</b></p><p>True positives: <b>'+tp+'</b> · False positives: <b>'+fp+'</b> · False negatives: <b>'+fn+'</b></p><p>Mean absolute timing error: <b>'+((mae*1000).toFixed(1))+' ms</b></p><p>Matching tolerance: <b>'+((tol*1000).toFixed(0))+' ms</b></p></div>'+
