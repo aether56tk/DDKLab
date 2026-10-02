@@ -128,7 +128,7 @@ function tuningLab(targetAuto,targetHuman){
    '<div class="card"><h3>Best tested configuration</h3><p><b>'+best.name+'</b> · min gap '+Math.round(best.cfg.minGap*1000)+' ms · smoothing '+best.cfg.smoothMs+' ms · LP '+best.cfg.lpHz+' Hz</p><p>F1 <b>'+((best.m.f1*100).toFixed(1))+'%</b> · Precision <b>'+((best.m.precision*100).toFixed(1))+'%</b> · Recall <b>'+((best.m.recall*100).toFixed(1))+'%</b> · MAE <b>'+best.m.mae.toFixed(1)+' ms</b></p></div>'+
    '<div class="card report">This is an empirical parameter sweep on the current annotated waveform. The selected configuration is not automatically promoted to production DSP. Re-test it on additional recordings before adopting it.</div>'+
    '<button class="btn" id="saveTune">SAVE BEST CONFIG TO SESSION</button><button class="btn" id="backTune" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">BACK TO ANNOTATION</button></div>';
-  $('saveTune').onclick=function(){sessions.unshift({type:'tuning',time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,config:best.cfg,metrics:best.m,preset:best.name});save();$('saveTune').textContent='SAVED LOCALLY'};
+  $('saveTune').onclick=function(){sessions.unshift({type:'tuning',time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,config:best.cfg,metrics:best.m,preset:best.name,versionId:'EXP-'+Date.now(),baseVersion:'DSP-v26'});save();$('saveTune').textContent='SAVED LOCALLY'};
   $('backTune').onclick=function(){annotation()};
  }
  function CFG_FOR_TUNING(mode){return {Adult:{minGap:.075,smoothMs:48,lpHz:12},Child:{minGap:.060,smoothMs:44,lpHz:13},Geriatric:{minGap:.080,smoothMs:52,lpHz:11},Dysarthria:{minGap:.050,smoothMs:42,lpHz:14}}[mode]||{minGap:.075,smoothMs:48,lpHz:12}}
