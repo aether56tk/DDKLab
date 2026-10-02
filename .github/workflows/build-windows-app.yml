@@ -43,15 +43,16 @@ jobs:
           if-no-files-found: error
 
       - name: Publish Windows installer to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v1.0.0"
+          $tag = "${{ github.ref_name }}"
           $exe = Get-ChildItem "dist/DDKLab-Setup-*.exe" | Select-Object -First 1
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag $exe.FullName --title "DDKLab v1.0.0" --notes "DDKLab Windows desktop application. Local-only DDK analysis with deterministic DSP, waveform review, AMR/SMR analysis, local storage, and application PIN." --latest
+            gh release create $tag $exe.FullName --title "DDKLab $tag" --notes "DDKLab Windows desktop application. Local-only DDK analysis with deterministic DSP, waveform review, AMR/SMR analysis, local storage, and application PIN." --latest
           } else {
             gh release upload $tag $exe.FullName --clobber
           }
