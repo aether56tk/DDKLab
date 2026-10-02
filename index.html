@@ -44,7 +44,7 @@ function annotation(){
       '</svg><div class="status">Automatic: '+auto.length+' · Human: '+human.length+'</div></div>'+
       '<div class="card"><div class="stats"><div class="stat">Automatic<b>'+auto.length+'</b></div><div class="stat">Human<b>'+human.length+'</b></div><div class="stat">Difference<b>'+(human.length-auto.length>0?'+':'')+(human.length-auto.length)+'</b></div></div></div>'+
       '<div class="card"><label class="label">Match tolerance (ms)</label><input class="input" id="tol" type="number" min="20" max="250" value="80"><div class="status">Events within this timing window are matched for validation.</div></div>'+
-      '<button class="btn" id="validate">CALCULATE VALIDATION</button><button class="btn" id="backResult" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">BACK TO RESULT</button></div>';
+      '<button class="btn" id="validate">CALCULATE VALIDATION</button><button class="btn" id="tuneNow">OPEN DSP TUNING LAB</button><button class="btn" id="backResult" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">BACK TO RESULT</button></div>';
     $('app').innerHTML=html;
     $('addMode').onclick=function(){mode='add';$('addMode').style.background='var(--accent)';$('removeMode').style.background='transparent'};
     $('removeMode').onclick=function(){mode='remove';$('removeMode').style.background='var(--accent)';$('addMode').style.background='transparent'};
@@ -54,6 +54,7 @@ function annotation(){
       render();
     };
     $('validate').onclick=function(){validation(auto,human,Math.max(.02,Number($('tol').value)/1000))};
+    $('tuneNow').onclick=function(){tuningLab(auto,human)};
     $('backResult').onclick=result;
   }
   function validation(auto,human,tol){
@@ -76,30 +77,32 @@ function annotation(){
 
 
 
-function tuningLab(){
- var records=sessions.filter(function(s){return s.type==='validation'&&s.automaticMarkers&&s.humanMarkers}), presets=[
-  {name:'Baseline',tol:80,min:80},
-  {name:'Tight',tol:50,min:100},
-  {name:'Balanced',tol:65,min:90},
-  {name:'Lenient',tol:100,min:70},
-  {name:'Very tight',tol:35,min:110}
+function tuningLab(targetAuto,targetHuman){
+ var human=(targetHuman||[]).slice().sort(function(a,b){return a-b}), presets=[
+  {name:'Baseline',minGap:0,smoothMs:0,lpHz:0},
+  {name:'Faster repetitions',minGap:-10,smoothMs:-6,lpHz:1},
+  {name:'Slower repetitions',minGap:10,smoothMs:6,lpHz:-1},
+  {name:'Sharper envelope',minGap:0,smoothMs:-12,lpHz:2},
+  {name:'Smoother envelope',minGap:0,smoothMs:12,lpHz:-2}
  ];
- function evaluate(tol){var tp=fp=fn=0,err=0;records.forEach(function(s){var a=s.automaticMarkers||[],h=s.humanMarkers||[],used={},local=0;h.forEach(function(x){var bi=-1,bd=Infinity;a.forEach(function(y,i){if(used[i])return;var d=Math.abs(x-y);if(d<=tol/1000&&d<bd){bd=d;bi=i}});if(bi>=0){used[bi]=1;tp++;err+=bd;local++}});fp+=a.length-local;fn+=h.length-local});var p=tp/(tp+fp||1),r=tp/(tp+fn||1);return {tp:tp,fp:fp,fn:fn,precision:p,recall:r,f1:2*p*r/(p+r||1),mae:tp?err/tp*1000:0}}
+ function match(auto,tol){var used={},tp=0,err=0;human.forEach(function(h){var bi=-1,bd=Infinity;auto.forEach(function(a,i){if(used[i])return;var d=Math.abs(a-h);if(d<=tol/1000&&d<bd){bd=d;bi=i}});if(bi>=0){used[bi]=1;tp++;err+=bd}});var fp=auto.length-tp,fn=human.length-tp,p=tp/(tp+fp||1),r=tp/(tp+fn||1);return {tp:tp,fp:fp,fn:fn,precision:p,recall:r,f1:2*p*r/(p+r||1),mae:tp?err/tp*1000:0}};
  function run(){
-  var rows=presets.map(function(x){var m=evaluate(x.tol);return {name:x.name,tol:x.tol,m:m}});
+  if(!state.audio||!human.length){$('app').innerHTML=shell('DSP Tuning Lab')+'<div class="card status">A recorded waveform and human annotation are required. Open this from Waveform Annotation after marking the recording.</div><button class="btn" id="backTune">BACK</button>';return $('backTune').onclick=result}
+  var base=CFG_FOR_TUNING(state.mode),tol=80;
+  var rows=presets.map(function(x){var cfg={minGap:Math.max(.035,base.minGap+x.minGap/1000),smoothMs:Math.max(20,base.smoothMs+x.smoothMs),lpHz:Math.max(7,base.lpHz+x.lpHz)},d=window.detectDDKWithConfig(state.audio,state.sr,state.mode,state.task==='SMR PATAKA',cfg),m=match(d.events,tol);return {name:x.name,cfg:cfg,d:d,m:m}});
+  var best=rows.reduce(function(a,b){return b.m.f1>a.m.f1?b:a},rows[0]);
   $('app').innerHTML=shell('DSP Parameter Tuning Lab')+
-   '<div class="stack"><div class="card"><b>Validation dataset</b><div class="status">'+records.length+' validation sessions with stored marker timestamps are available. This lab tunes validation matching parameters; it does not alter the DSP detector itself.</div></div>'+
-   '<div class="card"><h3>Parameter presets</h3><div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><tr><th>Preset</th><th>Tolerance</th><th>Precision</th><th>Recall</th><th>F1</th><th>MAE</th></tr>'+rows.map(function(x){return '<tr><td>'+x.name+'</td><td>'+x.tol+' ms</td><td>'+((x.m.precision*100).toFixed(1))+'%</td><td>'+((x.m.recall*100).toFixed(1))+'%</td><td>'+((x.m.f1*100).toFixed(1))+'%</td><td>'+x.m.mae.toFixed(1)+' ms</td></tr>'}).join('')+'</table></div></div>'+
-   '<div class="card"><h3>Custom validation tolerance</h3><input class="input" id="customTol" type="number" min="20" max="250" value="80"><button class="btn" id="runCustom" style="margin-top:8px">RUN CUSTOM</button><div id="customOut" class="status"></div></div>'+
-   '<div class="card report">Interpretation: changing tolerance changes event matching, not the underlying acoustic detector. Use this as a validation-sensitivity analysis before changing DSP parameters.</div>'+
-   '<button class="btn" id="exportTune">EXPORT TUNING RESULTS</button><button class="btn" id="backTune" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">BACK</button></div>';
-  $('runCustom').onclick=function(){var m=evaluate(Math.max(20,Math.min(250,Number($('customTol').value)||80)));$('customOut').innerHTML='Precision <b>'+((m.precision*100).toFixed(1))+'%</b> · Recall <b>'+((m.recall*100).toFixed(1))+'%</b> · F1 <b>'+((m.f1*100).toFixed(1))+'%</b> · MAE <b>'+m.mae.toFixed(1)+' ms</b>'};
-  $('exportTune').onclick=function(){var csv='preset,toleranceMs,precision,recall,f1,maeMs\n'+rows.map(function(x){return [x.name,x.tol,x.m.precision,x.m.recall,x.m.f1,x.m.mae].join(',')}).join('\n');var b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='ddklab-tuning-results.csv';a.click();setTimeout(function(){URL.revokeObjectURL(u)},500)};
-  $('backTune').onclick=home;
+   '<div class="stack"><div class="card"><b>Current recording benchmark</b><div class="status">The detector is being re-run on the actual waveform with different DSP parameter sets. Matching tolerance is '+tol+' ms.</div></div>'+
+   '<div class="card"><h3>Parameter sweep</h3><div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><tr><th>Preset</th><th>Min gap</th><th>Smoothing</th><th>LP Hz</th><th>F1</th><th>Precision</th><th>Recall</th><th>MAE</th></tr>'+rows.map(function(x){return '<tr><td>'+x.name+'</td><td>'+Math.round(x.cfg.minGap*1000)+' ms</td><td>'+x.cfg.smoothMs+' ms</td><td>'+x.cfg.lpHz+'</td><td>'+((x.m.f1*100).toFixed(1))+'%</td><td>'+((x.m.precision*100).toFixed(1))+'%</td><td>'+((x.m.recall*100).toFixed(1))+'%</td><td>'+x.m.mae.toFixed(1)+' ms</td></tr>'}).join('')+'</table></div></div>'+
+   '<div class="card"><h3>Best tested configuration</h3><p><b>'+best.name+'</b> · min gap '+Math.round(best.cfg.minGap*1000)+' ms · smoothing '+best.cfg.smoothMs+' ms · LP '+best.cfg.lpHz+' Hz</p><p>F1 <b>'+((best.m.f1*100).toFixed(1))+'%</b> · Precision <b>'+((best.m.precision*100).toFixed(1))+'%</b> · Recall <b>'+((best.m.recall*100).toFixed(1))+'%</b> · MAE <b>'+best.m.mae.toFixed(1)+' ms</b></p></div>'+
+   '<div class="card report">This is an empirical parameter sweep on the current annotated waveform. The selected configuration is not automatically promoted to production DSP. Re-test it on additional recordings before adopting it.</div>'+
+   '<button class="btn" id="saveTune">SAVE BEST CONFIG TO SESSION</button><button class="btn" id="backTune" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">BACK TO ANNOTATION</button></div>';
+  $('saveTune').onclick=function(){sessions.unshift({type:'tuning',time:new Date().toISOString(),pid:state.pid,mode:state.mode,task:state.task,config:best.cfg,metrics:best.m,preset:best.name});save();$('saveTune').textContent='SAVED LOCALLY'};
+  $('backTune').onclick=function(){annotation()};
  }
+ function CFG_FOR_TUNING(mode){return {Adult:{minGap:.075,smoothMs:48,lpHz:12},Child:{minGap:.060,smoothMs:44,lpHz:13},Geriatric:{minGap:.080,smoothMs:52,lpHz:11},Dysarthria:{minGap:.050,smoothMs:42,lpHz:14}}[mode]||{minGap:.075,smoothMs:48,lpHz:12}}
  run();
 }
-
 function errorExplorer(){
  var records=sessions.filter(function(s){return s.type==='validation'}), idx=0;
  function pairs(s){
