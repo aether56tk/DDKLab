@@ -1,4 +1,4 @@
-name: DDKLab Quality
+name: DDKLab Browser Quality
 
 on:
   push:
@@ -14,9 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run check
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check dsp-v5.js
+          node --check ddklab-enhancements.js
+      - name: Check required browser entry files
+        run: |
+          test -f index.html
+          test -f dsp-v5.js
+          test -f manifest.webmanifest
+          test -f sw.js
+          test -f 404.html
