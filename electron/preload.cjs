@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
-contextBridge.exposeInMainWorld('ddklab', Object.freeze({
+
+const api = {
   platform: process.platform,
-  version: '0.1.0',
+  version: '1.1.1',
   security: {
     getPinState: () => ipcRenderer.invoke('security:getPinState'),
     setPin: (pin) => ipcRenderer.invoke('security:setPin', pin),
@@ -13,4 +14,6 @@ contextBridge.exposeInMainWorld('ddklab', Object.freeze({
     listSessions: () => ipcRenderer.invoke('storage:listSessions'),
     loadSession: (id) => ipcRenderer.invoke('storage:loadSession', id)
   }
-}));
+};
+
+contextBridge.exposeInMainWorld('ddklab', Object.freeze(api));
