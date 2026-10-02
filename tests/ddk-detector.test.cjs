@@ -9,7 +9,7 @@ vm.createContext(context);
 vm.runInContext(source, context);
 
 assert.equal(typeof context.window.detectDDK, 'function');
-assert.equal(context.window.DDK_DSP_VERSION, 'DSP-v23');
+assert.equal(context.window.DDK_DSP_VERSION, 'DSP-v26');
 
 function toneTrain({sr=16000, duration=2, interval=0.2, pulse=0.07, amp=0.5}={}) {
   const x = new Float32Array(Math.round(sr * duration));
@@ -34,7 +34,7 @@ function toneTrain({sr=16000, duration=2, interval=0.2, pulse=0.07, amp=0.5}={})
   const result = context.window.detectDDK(toneTrain(),16000,'Adult',false);
   assert.ok(result.events.length >= 5, 'expected repeated events, got '+result.events.length);
   assert.ok(result.events.every((t,i)=>i===0 || t>result.events[i-1]));
-  assert.equal(result.debug.version,'DSP-v23');
+  assert.equal(result.debug.version,'DSP-v26');
   assert.equal(result.debug.eventConfidence.length,result.events.length);
 }
 
