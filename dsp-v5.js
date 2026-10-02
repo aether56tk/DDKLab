@@ -1,8 +1,8 @@
-/* DDKLab DSP v23 — adaptive syllable detector
+/* DDKLab DSP v26 — adaptive syllable detector
    Local deterministic DSP only. No AI/LLM in the measurement path.
    PRELIMINARY until validated against human-annotated recordings.
 
-   v23 improvements:
+   v26 improvements:
    - dynamic absolute-energy envelope + RMS consensus
    - local-max + valley/prominence syllable support
    - adaptive repetition-period estimation
@@ -156,10 +156,10 @@ function qualityMetrics(x,sr){
 }
 function confidenceLabel(c){return c>=.78?'HIGH':c>=.58?'MODERATE':c>=.40?'LOW':'VERY LOW';}
 function detect(audio,sr,mode,isSMR,overrides){
-  if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v23',reason:'empty'}};
+  if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v26',reason:'empty'}};
   const base=CFG[mode]||CFG.Adult,ov=arguments.length>4&&arguments[4]?arguments[4]:{},cfg={...base,...ov},duration=audio.length/sr;
   const prep=preprocessForDDK(audio,sr),x=prep.audio,qc=qualityMetrics(x,sr);let mx=0;for(const v of x)mx=Math.max(mx,Math.abs(v));
-  if(mx<1e-5)return {events:[],duration,debug:{version:'DSP-v25',reason:'near_silence',noiseFloor:prep.noiseFloor}};
+  if(mx<1e-5)return {events:[],duration,debug:{version:'DSP-v26',reason:'near_silence',noiseFloor:prep.noiseFloor}};
   const e=absEnergyEnvelope(x,sr,cfg.lpHz),r=rmsEnvelope(x,sr),n=Math.min(e.e.length,r.e.length);
   const out=detectPeaks(e.e.slice(0,n),r.e.slice(0,n),e.step,cfg),events=out.events.map(v=>v.i*e.step);
   const ints=[];for(let i=1;i<events.length;i++)ints.push(events[i]-events[i-1]);
@@ -168,7 +168,7 @@ function detect(audio,sr,mode,isSMR,overrides){
   const rhythmScore=out.events.length>2?Math.max(0,Math.min(1,1-cv)):0;
   const signalScore=Math.max(0,Math.min(1,(qc.dbfs+45)/30))*(1-Math.min(.5,qc.clipRatio*8));
   const sessionConfidence=Math.max(0,Math.min(1,.50*meanConf+.25*rhythmScore+.25*signalScore));
-  return {events,duration,debug:{version:'DSP-v24',method:'dynamic absolute-energy envelope + RMS consensus + valley/prominence support + adaptive repetition-period estimation + weak-event rescue + soft rhythm gate + refractory suppression + tail rejection',sampleRate:sr,mode,isSMR:!!isSMR,candidates:out.candidates,selected:out.selected,meanInterval:mi,intervalCV:cv,expectedGap:out.expectedGap,smoothingMs:cfg.smoothMs,lowpassHz:cfg.lpHz,minGapMs:cfg.minGap*1000,eventConfidence:out.events.map(c=>({score:c.confidence,label:confidenceLabel(c.confidence),rescued:!!c.rescued})),meanEventConfidence:meanConf,sessionConfidence,sessionConfidenceLabel:confidenceLabel(sessionConfidence),rhythmScore,signalScore,quality:qc,rescuedEvents:out.events.filter(c=>c.rescued).length,noiseFloor:prep.noiseFloor,noiseGate:prep.gate,preprocessing:'mean-pressure subtraction + adaptive stationary-noise attenuation + 70-Hz high-pass',referenceModel:'Praat-inspired intensity contour / local prominence / peak interpolation principles; not a Praat implementation',note:'PRELIMINARY automatic measurement; verify against human waveform annotation.'}};
+  return {events,duration,debug:{version:'DSP-v26',method:'dynamic absolute-energy envelope + RMS consensus + valley/prominence support + adaptive repetition-period estimation + weak-event rescue + soft rhythm gate + refractory suppression + tail rejection',sampleRate:sr,mode,isSMR:!!isSMR,candidates:out.candidates,selected:out.selected,meanInterval:mi,intervalCV:cv,expectedGap:out.expectedGap,smoothingMs:cfg.smoothMs,lowpassHz:cfg.lpHz,minGapMs:cfg.minGap*1000,eventConfidence:out.events.map(c=>({score:c.confidence,label:confidenceLabel(c.confidence),rescued:!!c.rescued})),meanEventConfidence:meanConf,sessionConfidence,sessionConfidenceLabel:confidenceLabel(sessionConfidence),rhythmScore,signalScore,quality:qc,rescuedEvents:out.events.filter(c=>c.rescued).length,noiseFloor:prep.noiseFloor,noiseGate:prep.gate,preprocessing:'mean-pressure subtraction + adaptive stationary-noise attenuation + 70-Hz high-pass',referenceModel:'Praat-inspired intensity contour / local prominence / peak interpolation principles; not a Praat implementation',note:'PRELIMINARY automatic measurement; verify against human waveform annotation.'}};
 }
 window.detectDDK=detect;
 window.detectDDKWithConfig=function(audio,sr,mode,isSMR,overrides){return detect(audio,sr,mode,isSMR,overrides||{})};
