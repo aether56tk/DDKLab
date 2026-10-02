@@ -155,9 +155,9 @@ function qualityMetrics(x,sr){
   return {rms,dbfs,peak,clipRatio:clip,headRms:Math.sqrt(hs/Math.max(1,head)),tailRms:Math.sqrt(ts/Math.max(1,tail))};
 }
 function confidenceLabel(c){return c>=.78?'HIGH':c>=.58?'MODERATE':c>=.40?'LOW':'VERY LOW';}
-function detect(audio,sr,mode,isSMR){
+function detect(audio,sr,mode,isSMR,overrides){
   if(!audio?.length||!sr)return {events:[],duration:0,debug:{version:'DSP-v23',reason:'empty'}};
-  const cfg=CFG[mode]||CFG.Adult,duration=audio.length/sr;
+  const base=CFG[mode]||CFG.Adult,ov=arguments.length>4&&arguments[4]?arguments[4]:{},cfg={...base,...ov},duration=audio.length/sr;
   const prep=preprocessForDDK(audio,sr),x=prep.audio,qc=qualityMetrics(x,sr);let mx=0;for(const v of x)mx=Math.max(mx,Math.abs(v));
   if(mx<1e-5)return {events:[],duration,debug:{version:'DSP-v25',reason:'near_silence',noiseFloor:prep.noiseFloor}};
   const e=absEnergyEnvelope(x,sr,cfg.lpHz),r=rmsEnvelope(x,sr),n=Math.min(e.e.length,r.e.length);
@@ -171,5 +171,6 @@ function detect(audio,sr,mode,isSMR){
   return {events,duration,debug:{version:'DSP-v24',method:'dynamic absolute-energy envelope + RMS consensus + valley/prominence support + adaptive repetition-period estimation + weak-event rescue + soft rhythm gate + refractory suppression + tail rejection',sampleRate:sr,mode,isSMR:!!isSMR,candidates:out.candidates,selected:out.selected,meanInterval:mi,intervalCV:cv,expectedGap:out.expectedGap,smoothingMs:cfg.smoothMs,lowpassHz:cfg.lpHz,minGapMs:cfg.minGap*1000,eventConfidence:out.events.map(c=>({score:c.confidence,label:confidenceLabel(c.confidence),rescued:!!c.rescued})),meanEventConfidence:meanConf,sessionConfidence,sessionConfidenceLabel:confidenceLabel(sessionConfidence),rhythmScore,signalScore,quality:qc,rescuedEvents:out.events.filter(c=>c.rescued).length,noiseFloor:prep.noiseFloor,noiseGate:prep.gate,preprocessing:'mean-pressure subtraction + adaptive stationary-noise attenuation + 70-Hz high-pass',referenceModel:'Praat-inspired intensity contour / local prominence / peak interpolation principles; not a Praat implementation',note:'PRELIMINARY automatic measurement; verify against human waveform annotation.'}};
 }
 window.detectDDK=detect;
-window.DDK_DSP_VERSION='DSP-v25';
+window.detectDDKWithConfig=function(audio,sr,mode,isSMR,overrides){return detect(audio,sr,mode,isSMR,overrides||{})};
+window.DDK_DSP_VERSION='DSP-v26';
 })();
