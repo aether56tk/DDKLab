@@ -1,3 +1,5 @@
+![Quality](https://github.com/aether56tk/DDKLab/actions/workflows/quality.yml/badge.svg)
+
 # DDKLab
 
 **Browser-based, local-first Diadochokinetic (DDK) assessment and research-validation platform.**
