@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use DDKLab, please cite this software."
+type: software
+title: "DDKLab"
+authors:
+  - family-names: "Tk"
+    given-names: "Adithyan"
+date-released: 2026-10-03
+url: "https://github.com/aether56tk/DDKLab"
+repository-code: "https://github.com/aether56tk/DDKLab"
