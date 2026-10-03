@@ -35,27 +35,25 @@ The browser can use the device microphone after permission is granted. Audio pro
 
 ## Measurement pipeline
 
-```text
-Microphone
-  ↓
-Browser audio capture
-  ↓
-Deterministic DSP
-  ↓
-Amplitude / energy envelope
-  ↓
-Event detection
-  ↓
-AMR / SMR grouping
-  ↓
-Waveform + markers
-  ↓
-Human verification
-  ↓
-Final DDK measurements
-  ↓
-Browser local storage / export
-```
+    Microphone
+      ↓
+    Browser audio capture
+      ↓
+    Deterministic DSP
+      ↓
+    Amplitude / energy envelope
+      ↓
+    Event detection
+      ↓
+    AMR / SMR grouping
+      ↓
+    Waveform + markers
+      ↓
+    Human verification
+      ↓
+    Final DDK measurements
+      ↓
+    Browser local storage / export
 
 The automatic detector is **PRELIMINARY**. It is not clinically validated and must not be represented as a diagnostic system or as 100% accurate.
 
@@ -85,6 +83,13 @@ The core workflow is local-first. Do not place real participant recordings, name
 The browser version is a static web application. The main entry point is `index.html`, with DSP logic in `dsp-v5.js` and supporting browser assets in the repository.
 
 There is intentionally **no Node/Electron/Gradle build requirement for end users**.
+
+## Project files
+
+- [Security policy](SECURITY.md)
+- [Contributing guide](CONTRIBUTING.md)
+- [Citation metadata](CITATION.cff)
+- [Validation status](VALIDATION_STATUS.md)
 
 ## Feedback
 
